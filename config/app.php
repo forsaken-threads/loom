@@ -170,6 +170,11 @@ return [
         //
 
         /*
+         * Loom Service Providers
+         */
+        App\Providers\LoomServiceProvider::class,
+
+        /*
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
@@ -226,6 +231,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
+        'Loom' => App\Resources\LoomFacade::class,
     ],
 
 ];

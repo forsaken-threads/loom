@@ -13,7 +13,7 @@ class GenerateResource extends Command
      *
      * @var string
      */
-    protected $description = 'Interactive command to build a Jumbled or Eloquent repository.';
+    protected $description = 'Interactive command to build a Loom resource.';
 
     /**
      * The console command name.
@@ -29,101 +29,83 @@ class GenerateResource extends Command
      */
     public function fire()
     {
-        $resourceName = $this->getInput('What is the name for the new resource?', true, function ($answer) {
+        $resourceName = $this->getInput(trans('commands/generate-resource.ask-for-name'), function ($answer) {
             if (empty($answer)) {
-                $this->error('You must enter a name for the new resource.');
+                $this->error(trans('commands/generate-resource.ask-for-name-error'));
+                return false;
+            }
+            if (!preg_match('/^[A-Z]\w+$/', $answer)) {
+                $this->error(trans('commands/generate-resource.name-validation-error'));
                 return false;
             }
             return true;
         });
 
-        $resourceGroup = $this->getInput('Under what grouping (if any) will this resource reside? (blank if none) ',
-            true, function ($answer) {
-                if (empty($answer)) {
+        if ($resourceName === false) {
+            return;
+        }
+
+        $resourceGroup = $this->getInput(trans('commands/generate-resource.ask-for-group'), function ($answer) {
+                if ($answer === '_') {
                     return true;
                 }
-                $directory = app_path(app_path('Resources/') . $answer);
+                if (!preg_match('/^\w+$/', $answer)) {
+                    $this->error(trans('commands/generate-resource.group-validation-error'));
+                    return false;
+                }
+                $directory = \Loom::getResourceModelBasePath($answer);
                 if (is_dir($directory)) {
                     return true;
-                } elseif ($this->confirm('That grouping does not exist.  Would you like to create it? [yes|no]')) {
-                    if (mkdir($directory)) {
-                        return true;
-                    } else {
-                        $this->error('There was a problem creating that grouping.');
-                        return false;
-                    }
+                } elseif ($this->confirm(trans('commands/generate-resource.group-confirm-create'))) {
+                    return true;
                 } else {
                     return false;
                 }
             });
 
-        $this->info("Building a resource named $resourceName" . $resourceGroup ? " within the $resourceGroup group." : '.');
+        if ($resourceGroup === false) {
+            return;
+        } elseif ($resourceGroup === '_') {
+            $resourceGroup = null;
+        }
 
-        $this->createEloquentModel($resourceName, $resourceGroup);
-        $this->createResourceController($resourceName, $resourceGroup);
+        if (\Loom::resourceModelExists($resourceName, $resourceGroup)) {
+            $this->error(trans('commands/generate-resource.resource-model-exists', ['group' => $resourceGroup ? ' and group' : '']));
+            return;
+        }
 
-        return true;
+        if (\Loom::resourceControllerExists($resourceName, $resourceGroup)) {
+            $this->error(trans('commands/generate-resource.resource-controller-exists', ['group' => $resourceGroup ? ' and group' : '']));
+            return;
+        }
+
+        $this->info(trans('commands/generate-resource.building-resource', [
+            'name' => $resourceName,
+            'group' => $resourceGroup
+                ? ' ' . trans('commands/generate-resource.within-group', ['group' => $resourceGroup])
+                : '',
+        ]));
+
+        if (!\Loom::createEloquentModel($resourceName, $resourceGroup)) {
+            $this->error(trans('commands/generate-resource.eloquent-model-error'));
+        }
+
+        if (!\Loom::createResourceController($resourceName, $resourceGroup)) {
+            $this->error(trans('commands/generate-resource.resource-controller-error'));
+        }
+
+        return;
     }
 
-    protected function getInput($question, $die_on_failure, Closure $callback)
+    protected function getInput($question, Closure $callback)
     {
         do {
             $answer = $this->ask($question);
             if ($callback($answer)) {
                 return $answer;
             }
-        } while ($this->confirm('Would you like to try again? [yes|no]'));
+        } while ($answer !== false && $this->confirm(trans('commands/generate-resource.try-again')));
 
-        if ($die_on_failure) {
-            exit;
-        }
         return false;
     }
-
-    private function createEloquentModel($name, $group)
-    {
-        $this->info('Building Eloquent model');
-
-        $data = [
-            'name' => $name,
-            'group' => $group ? '\\' . $group : '',
-        ];
-        $content = view('commands.generate-resource.eloquent-model', $data)->__toString();
-
-        $file = $name . '.php';
-        if ($group) {
-            $file = "$group/$file";
-        }
-
-        if (!file_put_contents(app_path('Resources/' . $file), $content)) {
-            $this->error('There was an error building the eloquent model.');
-            return false;
-        }
-
-        return true;
-    }
-
-    private function createResourceController($name, $group)
-    {
-        $this->info('Building resource controller');
-
-        $data = [
-            'name' => $name,
-            'group' => $group ? '\\' . $group : '',
-        ];
-        $content = view('commands.generate-resource.resource-controller', $data)->__toString();
-
-        $file = $name . '.php';
-        if ($group) {
-            $file = "$group/$file";
-        }
-
-        if (!file_put_contents(app_path('Http/Controllers/Resources/' . $file), $content)) {
-            $this->error('There was an error building the resource controller.');
-            return false;
-        }
-
-        return true;
-    }
-
 }

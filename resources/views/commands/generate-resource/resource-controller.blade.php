@@ -3,16 +3,11 @@
 namespace App\Http\Controllers\Resources{{ $group }};
 
 use App\Http\Controllers\Controller;
-@if ($group) use App\Http\Controllers\Resources\WeavesResources; @endif
+@if ($group)
+use App\Http\Controllers\Resources\WeavesResources;
+@endif
 
-class {{ $name }} extends Controller
+class {{ $name }}Controller extends Controller
 {
     use WeavesResources;
-
-    protected function getValidationRules()
-    {
-        return [
-            'default' => [],
-        ];
-    }
 }
