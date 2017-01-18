@@ -1,2 +1,2 @@
-# loom
-Vertically integrated API builder
+# Loom by forsaken-threads
+Vertically integrated application builder
