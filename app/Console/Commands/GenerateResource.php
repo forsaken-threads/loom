@@ -29,9 +29,9 @@ class GenerateResource extends Command
      */
     public function fire()
     {
-        $resourceName = $this->getInput('What is the basename for the new resource?', true, function ($answer) {
+        $resourceName = $this->getInput('What is the name for the new resource?', true, function ($answer) {
             if (empty($answer)) {
-                $this->error('You must enter a basename for the new resource.');
+                $this->error('You must enter a name for the new resource.');
                 return false;
             }
             return true;
