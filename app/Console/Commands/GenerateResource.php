@@ -13,7 +13,7 @@ class GenerateResource extends Command
      *
      * @var string
      */
-    protected $description = 'Interactive command to build a Loom resource.';
+    protected $description = 'Interactive command to build a Webstuhl resource.';
 
     /**
      * The console command name.
@@ -53,7 +53,7 @@ class GenerateResource extends Command
                     $this->error(trans('commands/generate-resource.group-validation-error'));
                     return false;
                 }
-                $directory = \Loom::getResourceModelBasePath($answer);
+                $directory = \Webstuhl::getResourceModelBasePath($answer);
                 if (is_dir($directory)) {
                     return true;
                 } elseif ($this->confirm(trans('commands/generate-resource.group-confirm-create'))) {
@@ -69,12 +69,12 @@ class GenerateResource extends Command
             $resourceGroup = null;
         }
 
-        if (\Loom::resourceModelExists($resourceName, $resourceGroup)) {
+        if (\Webstuhl::resourceModelExists($resourceName, $resourceGroup)) {
             $this->error(trans('commands/generate-resource.resource-model-exists', ['group' => $resourceGroup ? ' and group' : '']));
             return;
         }
 
-        if (\Loom::resourceControllerExists($resourceName, $resourceGroup)) {
+        if (\Webstuhl::resourceControllerExists($resourceName, $resourceGroup)) {
             $this->error(trans('commands/generate-resource.resource-controller-exists', ['group' => $resourceGroup ? ' and group' : '']));
             return;
         }
@@ -86,11 +86,11 @@ class GenerateResource extends Command
                 : '',
         ]));
 
-        if (!\Loom::createEloquentModel($resourceName, $resourceGroup)) {
+        if (!\Webstuhl::createEloquentModel($resourceName, $resourceGroup)) {
             $this->error(trans('commands/generate-resource.eloquent-model-error'));
         }
 
-        if (!\Loom::createResourceController($resourceName, $resourceGroup)) {
+        if (!\Webstuhl::createResourceController($resourceName, $resourceGroup)) {
             $this->error(trans('commands/generate-resource.resource-controller-error'));
         }
 

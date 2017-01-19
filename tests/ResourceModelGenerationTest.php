@@ -6,6 +6,10 @@ use org\bovigo\vfs\vfsStreamDirectory;
 class ResourceModelGenerationTest extends TestCase
 {
 
+    const RESOURCE_MODEL = 'TestResource';
+    const RESOURCE_GROUP = 'TestResourceGroup';
+    const RESOURCE_MODEL_EXISTING = 'User';
+
     /**
      * @var vfsStreamDirectory
      */
@@ -23,24 +27,29 @@ class ResourceModelGenerationTest extends TestCase
         $this->vfsRoot = vfsStream::setup('scratch', null, ['models' => []]);
         $this->modelPath = $this->vfsRoot->getChild('models');
 
-        Loom::setResourceModelBasePath($this->vfsRoot->getChild('models')->url());
+        Webstuhl::setResourceModelBasePath($this->vfsRoot->getChild('models')->url());
     }
 
     public function testModelBasePath()
     {
-        $this->assertEquals($this->modelPath->url(), Loom::getResourceModelBasePath());
-        $this->assertDirectoryExists(Loom::getResourceModelBasePath());
+        $this->assertEquals($this->modelPath->url(), Webstuhl::getResourceModelBasePath());
+        $this->assertDirectoryExists(Webstuhl::getResourceModelBasePath());
+    }
+
+    public function testResourceControllerExists()
+    {
+        $this->assertFalse(Webstuhl::createEloquentModel(self::RESOURCE_MODEL_EXISTING));
     }
 
     public function testResourceModelGenerationWithoutGroup()
     {
-        $this->assertTrue(Loom::createEloquentModel('TestResource'));
-        $this->assertTrue($this->modelPath->hasChild('TestResource.php'));
+        $this->assertTrue(Webstuhl::createEloquentModel(self::RESOURCE_MODEL));
+        $this->assertTrue($this->modelPath->hasChild(self::RESOURCE_MODEL . '.php'));
     }
 
     public function testResourceModelGenerationWithGroup()
     {
-        $this->assertTrue(Loom::createEloquentModel('TestResource', 'TestResourceGroup'));
-        $this->assertTrue($this->modelPath->hasChild('TestResourceGroup/TestResource.php'));
+        $this->assertTrue(Webstuhl::createEloquentModel(self::RESOURCE_MODEL, self::RESOURCE_GROUP));
+        $this->assertTrue($this->modelPath->hasChild(self::RESOURCE_GROUP . DIRECTORY_SEPARATOR . self::RESOURCE_MODEL . '.php'));
     }
 }

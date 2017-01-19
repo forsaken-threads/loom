@@ -45,8 +45,8 @@ class GenerateResourceCommandTest extends TestCase
         $this->controllerPath = $this->vfsRoot->getChild('controllers');
         $this->modelPath = $this->vfsRoot->getChild('models');
 
-        Loom::setResourceControllerBasePath($this->controllerPath->url());
-        Loom::setResourceModelBasePath($this->modelPath->url());
+        Webstuhl::setResourceControllerBasePath($this->controllerPath->url());
+        Webstuhl::setResourceModelBasePath($this->modelPath->url());
     }
 
     public function testGoodNameGoodGroup()
@@ -84,11 +84,11 @@ class GenerateResourceCommandTest extends TestCase
 
     public function testGoodNameGoodGroupRejectGroupCreation()
     {
-        Loom::shouldReceive('getResourceModelBasePath')->once()->andReturn($this->modelPath->url());
-        Loom::shouldReceive('createEloquentModel')->never();
-        Loom::shouldReceive('createResourceController')->never();
-        Loom::shouldReceive('resourceControllerExists')->never();
-        Loom::shouldReceive('resourceModelExists')->never();
+        Webstuhl::shouldReceive('getResourceModelBasePath')->once()->andReturn($this->modelPath->url() . DIRECTORY_SEPARATOR . self::RESOURCE_GROUP);
+        Webstuhl::shouldReceive('createEloquentModel')->never();
+        Webstuhl::shouldReceive('createResourceController')->never();
+        Webstuhl::shouldReceive('resourceControllerExists')->never();
+        Webstuhl::shouldReceive('resourceModelExists')->never();
 
         $this->command->shouldReceive('ask')
             ->once()
@@ -144,8 +144,8 @@ class GenerateResourceCommandTest extends TestCase
 
     public function testBadName()
     {
-        Loom::shouldReceive('createEloquentModel')->never();
-        Loom::shouldReceive('createResourceController')->never();
+        Webstuhl::shouldReceive('createEloquentModel')->never();
+        Webstuhl::shouldReceive('createResourceController')->never();
 
         $this->command->shouldReceive('ask')
             ->once()
@@ -169,8 +169,8 @@ class GenerateResourceCommandTest extends TestCase
     public function testBadNameRetry()
     {
 
-        Loom::shouldReceive('createEloquentModel')->never();
-        Loom::shouldReceive('createResourceController')->never();
+        Webstuhl::shouldReceive('createEloquentModel')->never();
+        Webstuhl::shouldReceive('createResourceController')->never();
 
         $this->command->shouldReceive('ask')
             ->twice()
@@ -236,8 +236,8 @@ class GenerateResourceCommandTest extends TestCase
 
     public function testGoodNameBadGroup()
     {
-        Loom::shouldReceive('createEloquentModel')->never();
-        Loom::shouldReceive('createResourceController')->never();
+        Webstuhl::shouldReceive('createEloquentModel')->never();
+        Webstuhl::shouldReceive('createResourceController')->never();
 
         $this->command->shouldReceive('ask')
             ->once()
@@ -265,8 +265,8 @@ class GenerateResourceCommandTest extends TestCase
 
     public function testGoodNameBadGroupRetry()
     {
-        Loom::shouldReceive('createEloquentModel')->never();
-        Loom::shouldReceive('createResourceController')->never();
+        Webstuhl::shouldReceive('createEloquentModel')->never();
+        Webstuhl::shouldReceive('createResourceController')->never();
 
         $this->command->shouldReceive('ask')
             ->once()

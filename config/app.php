@@ -12,7 +12,7 @@ return [
     | any other location as required by the application or its packages.
     */
 
-    'name' => 'Loom by forsaken-threads',
+    'name' => 'Webstuhl by forsaken-threads',
 
     /*
     |--------------------------------------------------------------------------
@@ -170,9 +170,9 @@ return [
         //
 
         /*
-         * Loom Service Providers
+         * Webstuhl Service Providers
          */
-        App\Providers\LoomServiceProvider::class,
+        App\Providers\WebstuhlServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -231,7 +231,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
 
-        'Loom' => App\Resources\LoomFacade::class,
+        'Webstuhl' => App\Resources\WebstuhlFacade::class,
     ],
 
 ];

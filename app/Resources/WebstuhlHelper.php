@@ -2,7 +2,7 @@
 
 namespace App\Resources;
 
-class LoomHelper
+class WebstuhlHelper
 {
 
     /**
@@ -62,6 +62,11 @@ class LoomHelper
         return true;
     }
 
+    /**
+     * @param $name
+     * @param null $group
+     * @return bool
+     */
     public function createResourceController($name, $group = null)
     {
         if ($this->resourceControllerExists($name, $group)) {
@@ -131,7 +136,7 @@ class LoomHelper
      */
     public function resourceControllerExists($name, $group = null)
     {
-        $resource = $this->controllerNamespace . '\\' . ($group ? $group . '\\' : '') . $name;
+        $resource = $this->controllerNamespace . '\\' . ($group ? $group . '\\' : '') . $name . 'Controller';
         return class_exists($resource);
     }
 

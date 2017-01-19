@@ -6,6 +6,10 @@ use org\bovigo\vfs\vfsStreamDirectory;
 class ResourceControllerGenerationTest extends TestCase
 {
 
+    const RESOURCE_MODEL = 'TestResource';
+    const RESOURCE_MODEL_EXISTING = 'User';
+    const RESOURCE_GROUP = 'TestGroup';
+
     /**
      * @var vfsStreamDirectory
      */
@@ -23,25 +27,30 @@ class ResourceControllerGenerationTest extends TestCase
         $this->vfsRoot = vfsStream::setup('scratch', null, ['controllers' => []]);
         $this->controllerPath = $this->vfsRoot->getChild('controllers');
 
-        Loom::setResourceControllerBasePath($this->vfsRoot->getChild('controllers')->url());
+        Webstuhl::setResourceControllerBasePath($this->vfsRoot->getChild('controllers')->url());
 
     }
 
     public function testControllerBasePath()
     {
-        $this->assertEquals($this->controllerPath->url(), Loom::getResourceControllerBasePath());
-        $this->assertDirectoryExists(Loom::getResourceControllerBasePath());
+        $this->assertEquals($this->controllerPath->url(), Webstuhl::getResourceControllerBasePath());
+        $this->assertDirectoryExists(Webstuhl::getResourceControllerBasePath());
     }
 
     public function testResourceControllerGenerationWithoutGroup()
     {
-        $this->assertTrue(Loom::createResourceController('TestResource'));
-        $this->assertTrue($this->controllerPath->hasChild('TestResourceController.php'));
+        $this->assertTrue(Webstuhl::createResourceController(self::RESOURCE_MODEL));
+        $this->assertTrue($this->controllerPath->hasChild(self::RESOURCE_MODEL . 'Controller.php'));
+    }
+
+    public function testResourceControllerExists()
+    {
+        $this->assertFalse(Webstuhl::createResourceController(self::RESOURCE_MODEL_EXISTING));
     }
 
     public function testResourceControllerGenerationWithGroup()
     {
-        $this->assertTrue(Loom::createResourceController('TestResource', 'TestControllerGroup'));
-        $this->assertTrue($this->controllerPath->hasChild('TestControllerGroup/TestResourceController.php'));
+        $this->assertTrue(Webstuhl::createResourceController(self::RESOURCE_MODEL, self::RESOURCE_GROUP));
+        $this->assertTrue($this->controllerPath->hasChild(self::RESOURCE_GROUP . DIRECTORY_SEPARATOR . self::RESOURCE_MODEL . 'Controller.php'));
     }
 }
