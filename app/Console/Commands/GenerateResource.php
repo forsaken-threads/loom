@@ -34,7 +34,7 @@ class GenerateResource extends Command
                 $this->error(trans('commands/generate-resource.ask-for-name-error'));
                 return false;
             }
-            if (!preg_match('/^[A-Z]\w+$/', $answer)) {
+            if (!preg_match('/^[A-Z]\w*$/', $answer)) {
                 $this->error(trans('commands/generate-resource.name-validation-error'));
                 return false;
             }
@@ -49,7 +49,7 @@ class GenerateResource extends Command
                 if ($answer === '_') {
                     return true;
                 }
-                if (!preg_match('/^\w+$/', $answer)) {
+                if (!preg_match('/^[A-Z]\w*$/', $answer)) {
                     $this->error(trans('commands/generate-resource.group-validation-error'));
                     return false;
                 }

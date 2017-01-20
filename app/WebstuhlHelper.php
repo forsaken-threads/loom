@@ -1,6 +1,10 @@
 <?php
 
-namespace App\Resources;
+namespace App;
+
+use App\Resources\WebstuhlResource;
+use DB;
+use Log;
 
 class WebstuhlHelper
 {
@@ -55,9 +59,18 @@ class WebstuhlHelper
             $file = "$group/$file";
         }
 
-        if (!file_put_contents($this->getResourceModelBasePath() . "/$file", $content)) {
+        DB::beginTransaction();
+        try {
+            WebstuhlResource::create(['name' => $this->modelNamespace . '\\' . ($group ? $group . '\\' : '') . $name]);
+            if (!file_put_contents($this->getResourceModelBasePath() . "/$file", $content)) {
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage(), ['createEloquentModel' => func_get_args()]);
+            DB::rollBack();
             return false;
         }
+        DB::commit();
 
         return true;
     }

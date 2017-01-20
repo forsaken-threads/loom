@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Resources;
+namespace App\Facades;
 
-use Illuminate\Support\Facades\Facade;
+use App\WebstuhlHelper;
+use Illuminate\Support\Facades\Facade as BaseFacade;
 
-class WebstuhlFacade extends Facade
+class WebstuhlFacade extends BaseFacade
 {
     /**
      * Get the registered name of the component.

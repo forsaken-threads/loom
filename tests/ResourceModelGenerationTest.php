@@ -5,6 +5,7 @@ use org\bovigo\vfs\vfsStreamDirectory;
 
 class ResourceModelGenerationTest extends TestCase
 {
+    use \Illuminate\Foundation\Testing\DatabaseTransactions;
 
     const RESOURCE_MODEL = 'TestResource';
     const RESOURCE_GROUP = 'TestResourceGroup';
@@ -45,11 +46,13 @@ class ResourceModelGenerationTest extends TestCase
     {
         $this->assertTrue(Webstuhl::createEloquentModel(self::RESOURCE_MODEL));
         $this->assertTrue($this->modelPath->hasChild(self::RESOURCE_MODEL . '.php'));
+        $this->seeInDatabase('webstuhl_resources', ['name' => Webstuhl::getResourceModelNamespace() . '\\' . self::RESOURCE_MODEL]);
     }
 
     public function testResourceModelGenerationWithGroup()
     {
         $this->assertTrue(Webstuhl::createEloquentModel(self::RESOURCE_MODEL, self::RESOURCE_GROUP));
         $this->assertTrue($this->modelPath->hasChild(self::RESOURCE_GROUP . DIRECTORY_SEPARATOR . self::RESOURCE_MODEL . '.php'));
+        $this->seeInDatabase('webstuhl_resources', ['name' => Webstuhl::getResourceModelNamespace() . '\\' . self::RESOURCE_GROUP . '\\' . self::RESOURCE_MODEL]);
     }
 }

@@ -6,7 +6,7 @@ return [
     'name-validation-error' => 'Resource names must start with a capital letter and may only contain the following: A-Z, a-z, 0-9, _',
 
     'ask-for-group' => 'Under what grouping (if any) will this resource reside? (underscore if none) ',
-    'group-validation-error' => 'Resource names may only contain the following: A-Z, a-z, 0-9, _',
+    'group-validation-error' => 'Resource groups must start with a capital letter and may only contain the following: A-Z, a-z, 0-9, _',
     'group-confirm-create' => 'That grouping does not exist.  Would you like to create it?',
 
     'resource-model-exists' => 'A resource model with that name:group already exists.',

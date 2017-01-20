@@ -7,6 +7,8 @@ use org\bovigo\vfs\vfsStreamDirectory;
 
 class GenerateResourceCommandTest extends TestCase
 {
+    use \Illuminate\Foundation\Testing\DatabaseTransactions;
+
     const BAD_RESOURCE_MODEL = '1';
     const BAD_RESOURCE_GROUP = '-';
     const RESOURCE_MODEL = 'TestResource';

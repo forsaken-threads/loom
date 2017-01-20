@@ -1,16 +1,19 @@
-<{{ '?' }}php
+<?php
 
-namespace App\Resources{{ $group }};
+namespace App\Resources;
 
 use App\Traits\Weavable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class {{ $name }} extends Model
+class WebstuhlResource extends Model
 {
     use Weavable;
 
+    protected $guarded = ['id'];
+
     /**
-     * Get the contextual validation rules for the Webstuhl resource
+     * @return array
      */
     public function getValidationRules()
     {

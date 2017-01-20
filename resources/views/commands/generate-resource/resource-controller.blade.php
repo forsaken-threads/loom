@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Resources{{ $group }};
 
 use App\Http\Controllers\Controller;
-@if ($group)
-use App\Http\Controllers\Resources\WeavesResources;
-@endif
+use App\Traits\WeavesResources;
 
 class {{ $name }}Controller extends Controller
 {

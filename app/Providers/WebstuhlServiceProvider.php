@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use App\Resources\WebstuhlHelper;
+use App\Resources\WebstuhlResource;
+use App\WebstuhlHelper;
 use Illuminate\Support\ServiceProvider;
 use Webstuhl;
 
@@ -20,6 +21,10 @@ class WebstuhlServiceProvider extends ServiceProvider
 
         Webstuhl::setResourceModelBasePath(config('webstuhl.resources.modelBasePath'));
         Webstuhl::setResourceModelNamespace(config('webstuhl.resources.modelNamespace'));
+
+        foreach (WebstuhlResource::all() as $resource) {
+
+        }
     }
 
     /**

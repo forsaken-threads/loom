@@ -5,7 +5,6 @@ use org\bovigo\vfs\vfsStreamDirectory;
 
 class ResourceControllerGenerationTest extends TestCase
 {
-
     const RESOURCE_MODEL = 'TestResource';
     const RESOURCE_MODEL_EXISTING = 'User';
     const RESOURCE_GROUP = 'TestGroup';
