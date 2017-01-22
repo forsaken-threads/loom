@@ -19,12 +19,9 @@ class WebstuhlServiceProvider extends ServiceProvider
         Webstuhl::setResourceControllerBasePath(config('webstuhl.resources.controllerBasePath'));
         Webstuhl::setResourceControllerNamespace(config('webstuhl.resources.controllerNamespace'));
 
-        Webstuhl::setResourceModelBasePath(config('webstuhl.resources.modelBasePath'));
-        Webstuhl::setResourceModelNamespace(config('webstuhl.resources.modelNamespace'));
-
-        foreach (WebstuhlResource::all() as $resource) {
-
-        }
+        Webstuhl::setResourceBasePath(config('webstuhl.resources.resourceBasePath'));
+        Webstuhl::setResourceNamespace(config('webstuhl.resources.resourceNamespace'));
+        Webstuhl::setResourceRouteFilePath(config('webstuhl.resources.resourceRouteFilePath'));
     }
 
     /**

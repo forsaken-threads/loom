@@ -13,13 +13,15 @@ class WebstuhlResourcesSeeder extends Seeder
     {
         DB::table('webstuhl_resources')->truncate();
 
+        $namespace = Webstuhl::getResourceNamespace();
         $resources = [
-            \App\Resources\User::class,
-            \App\Resources\WebstuhlResource::class
+            "$namespace\\User",
+            "$namespace\\WebstuhlResource",
         ];
         foreach ($resources as $resource) {
-            $option = new \App\Resources\WebstuhlResource();
+            $option = app("$namespace\\WebstuhlResource");
             $option->name = $resource;
+            $option->url = Webstuhl::getResourceUrl(class_basename($resource));
             $option->save();
         }
     }

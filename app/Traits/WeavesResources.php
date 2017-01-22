@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+use App\Resources\WebstuhlResource;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -47,7 +49,9 @@ trait WeavesResources
      */
     public function index()
     {
-        return response('index');
+        /** @var Model $resource */
+        $resource = $this->getResourceClassName();
+        return $resource::all();
     }
 
 
@@ -59,7 +63,8 @@ trait WeavesResources
      */
     public function show($id)
     {
-        return response('show');
+        $resource = $this->getResourceClassName();
+        return $resource::find($id);
     }
 
     /**
@@ -85,4 +90,10 @@ trait WeavesResources
         return response('update');
     }
 
+    protected function getResourceClassName()
+    {
+        return \Webstuhl::getResourceNamespace() . str_replace(
+            [\Webstuhl::getResourceControllerNamespace(), 'Controller'], '', static::class
+        );
+    }
 }

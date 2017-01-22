@@ -53,7 +53,7 @@ class GenerateResource extends Command
                     $this->error(trans('commands/generate-resource.group-validation-error'));
                     return false;
                 }
-                $directory = \Webstuhl::getResourceModelBasePath($answer);
+                $directory = \Webstuhl::getResourceBasePath($answer);
                 if (is_dir($directory)) {
                     return true;
                 } elseif ($this->confirm(trans('commands/generate-resource.group-confirm-create'))) {
@@ -69,8 +69,8 @@ class GenerateResource extends Command
             $resourceGroup = null;
         }
 
-        if (\Webstuhl::resourceModelExists($resourceName, $resourceGroup)) {
-            $this->error(trans('commands/generate-resource.resource-model-exists', ['group' => $resourceGroup ? ' and group' : '']));
+        if (\Webstuhl::resourceExists($resourceName, $resourceGroup)) {
+            $this->error(trans('commands/generate-resource.resource-exists', ['group' => $resourceGroup ? ' and group' : '']));
             return;
         }
 
@@ -86,11 +86,9 @@ class GenerateResource extends Command
                 : '',
         ]));
 
-        if (!\Webstuhl::createEloquentModel($resourceName, $resourceGroup)) {
-            $this->error(trans('commands/generate-resource.eloquent-model-error'));
-        }
-
-        if (!\Webstuhl::createResourceController($resourceName, $resourceGroup)) {
+        if (!\Webstuhl::createResource($resourceName, $resourceGroup)) {
+            $this->error(trans('commands/generate-resource.resource-error'));
+        } elseif (!\Webstuhl::createResourceController($resourceName, $resourceGroup)) {
             $this->error(trans('commands/generate-resource.resource-controller-error'));
         }
 

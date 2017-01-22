@@ -2,12 +2,17 @@
 
 namespace App\Resources;
 
+use App\Traits\Weavable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable,
+        Weavable;
+
+    // Webstuhl resources use UUIDs for their primary key
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
@@ -26,4 +31,11 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function getValidationRules()
+    {
+        return [
+            'default' => [],
+        ];
+    }
 }

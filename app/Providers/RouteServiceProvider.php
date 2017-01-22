@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Routing\Router;
+use Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -23,9 +24,13 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
-
         parent::boot();
+
+        if (\Webstuhl::isWeaving()) {
+            $this->app->booted(function () {
+                Route::get('webstuhl', function() { return view('webstuhl.home'); });
+            });
+        }
     }
 
     /**
@@ -39,7 +44,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        //
+        $this->mapWebstuhlResourceRoutes();
     }
 
     /**
@@ -74,6 +79,21 @@ class RouteServiceProvider extends ServiceProvider
             'prefix' => 'api',
         ], function ($router) {
             require base_path('routes/api.php');
+        });
+    }
+
+    /**
+     * Define the Webstuhl resource routes for the application.
+     *
+     * @return void
+     */
+    protected function mapWebstuhlResourceRoutes()
+    {
+        Route::group([
+            'middleware' => ['web', 'auth'],
+            'namespace' => \Webstuhl::getResourceControllerNamespace(),
+        ], function ($router) {
+            require base_path('routes/webstuhl.php');
         });
     }
 }

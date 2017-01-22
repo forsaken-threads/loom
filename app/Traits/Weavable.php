@@ -13,18 +13,16 @@ use Ramsey\Uuid\Uuid;
  */
 trait Weavable
 {
-    abstract function getValidationRules();
+    abstract public function getValidationRules();
 
     /**
      *
      */
     public static function bootWeavable()
     {
-
         // Webstuhl resources use UUIDs for primary keys
         static::creating(function ($model) {
             /** @var Model $model */
-            $model->incrementing = false;
             $model->{$model->getKeyName()} = (string) Uuid::uuid4();
         });
     }

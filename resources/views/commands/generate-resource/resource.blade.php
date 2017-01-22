@@ -9,6 +9,9 @@ class {{ $name }} extends Model
 {
     use Weavable;
 
+    // Webstuhl resources use UUIDs for their primary key
+    public $incrementing = false;
+
     /**
      * Get the contextual validation rules for the Webstuhl resource
      */

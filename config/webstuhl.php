@@ -5,7 +5,8 @@ return [
         'controllerBasePath' => app_path('Http/Controllers/Resources'),
         'controllerNamespace' => 'App\\Http\\Controllers\\Resources',
 
-        'modelBasePath' => app_path('Resources'),
-        'modelNamespace' => 'App\\Resources',
+        'resourceBasePath' => app_path('Resources'),
+        'resourceNamespace' => 'App\\Resources',
+        'resourceRouteFilePath' => base_path('routes'),
     ]
 ];

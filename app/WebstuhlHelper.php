@@ -22,29 +22,35 @@ class WebstuhlHelper
     protected $controllerNamespace;
 
     /**
-     * Absolute file path to resource models
+     * Absolute file path to resource
      * @var string
      */
-    protected $modelBasePath;
+    protected $resourceBasePath;
 
     /**
-     * Namespace for resource models
+     * Namespace for resource
      * @var string
      */
-    protected $modelNamespace;
+    protected $resourceNamespace;
+
+    /**
+     * Absolute file path to resource route file directory
+     * @var string
+     */
+    protected $resourceRouteFilePath;
 
     /**
      * @param $name
      * @param null $group
      * @return bool
      */
-    public function createEloquentModel($name, $group = null)
+    public function createResource($name, $group = null)
     {
-        if ($this->resourceModelExists($name, $group)) {
+        if ($this->resourceExists($name, $group)) {
             return false;
         }
 
-        if ($group && !is_dir($this->getResourceModelBasePath($group)) && !mkdir($this->getResourceModelBasePath($group))) {
+        if ($group && !is_dir($this->getResourceBasePath($group)) && !mkdir($this->getResourceBasePath($group))) {
             return false;
         }
 
@@ -52,7 +58,7 @@ class WebstuhlHelper
             'name' => $name,
             'group' => $group ? '\\' . $group : '',
         ];
-        $content = view('commands.generate-resource.eloquent-model', $data)->__toString();
+        $content = view('commands.generate-resource.resource', $data)->__toString();
 
         $file = $name . '.php';
         if ($group) {
@@ -61,12 +67,20 @@ class WebstuhlHelper
 
         DB::beginTransaction();
         try {
-            WebstuhlResource::create(['name' => $this->modelNamespace . '\\' . ($group ? $group . '\\' : '') . $name]);
-            if (!file_put_contents($this->getResourceModelBasePath() . "/$file", $content)) {
+            WebstuhlResource::create([
+                'name' => $this->getResourceClassName($name, $group),
+                'url' => $this->getResourceUrl($name, $group),
+            ]);
+            if (!file_put_contents($this->getResourceBasePath() . "/$file", $content)) {
+                DB::rollBack();
+                return false;
+            }
+            if (!file_put_contents($this->getResourceRouteFilePath('webstuhl.php'), view('commands.generate-resource.resource-routes'))) {
+                DB::rollBack();
                 return false;
             }
         } catch (\Exception $e) {
-            Log::error($e->getMessage(), ['createEloquentModel' => func_get_args()]);
+            Log::error($e->getMessage(), [__FUNCTION__ => func_get_args()]);
             DB::rollBack();
             return false;
         }
@@ -129,17 +143,54 @@ class WebstuhlHelper
      * @param string $path
      * @return mixed
      */
-    public function getResourceModelBasePath($path = '')
+    public function getResourceBasePath($path = '')
     {
-        return $this->modelBasePath . ($path ? DIRECTORY_SEPARATOR . $path : '');
+        return $this->resourceBasePath . ($path ? DIRECTORY_SEPARATOR . $path : '');
+    }
+
+    /**
+     * @param $name
+     * @param null $group
+     * @return string
+     */
+    public function getResourceClassName($name, $group = null)
+    {
+        return $this->resourceNamespace . '\\' . ($group ? $group . '\\' : '') . $name;
     }
 
     /**
      * @return string
      */
-    public function getResourceModelNamespace()
+    public function getResourceNamespace()
     {
-        return $this->modelNamespace;
+        return $this->resourceNamespace;
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    public function getResourceRouteFilePath($path = '')
+    {
+        return $this->resourceRouteFilePath . ($path ? DIRECTORY_SEPARATOR . $path : '');
+    }
+
+    /**
+     * @param $name
+     * @param null $group
+     * @return string
+     */
+    public function getResourceUrl($name, $group = null)
+    {
+        return ($group ? snake_case($group) . '\\' : '') . str_plural(snake_case($name));
+    }
+
+    /**
+     * @return bool
+     */
+    public function isWeaving()
+    {
+        return !empty($_ENV['webstuhl-is-weaving']);
     }
 
     /**
@@ -158,9 +209,9 @@ class WebstuhlHelper
      * @param null $group
      * @return bool
      */
-    public function resourceModelExists($name, $group = null)
+    public function resourceExists($name, $group = null)
     {
-        $resource = $this->modelNamespace . '\\' . ($group ? $group . '\\' : '') . $name;
+        $resource = $this->resourceNamespace . '\\' . ($group ? $group . '\\' : '') . $name;
         return class_exists($resource);
     }
 
@@ -188,9 +239,9 @@ class WebstuhlHelper
      * @param $directory
      * @return $this
      */
-    public function setResourceModelBasePath($directory)
+    public function setResourceBasePath($directory)
     {
-        $this->modelBasePath = $directory;
+        $this->resourceBasePath = $directory;
         return $this;
     }
 
@@ -198,9 +249,17 @@ class WebstuhlHelper
      * @param $namespace
      * @return $this
      */
-    public function setResourceModelNamespace($namespace)
+    public function setResourceNamespace($namespace)
     {
-        $this->modelNamespace = $namespace;
+        $this->resourceNamespace = $namespace;
         return $this;
+    }
+
+    /**
+     * @param $directory
+     */
+    public function setResourceRouteFilePath($directory)
+    {
+        $this->resourceRouteFilePath = $directory;
     }
 }

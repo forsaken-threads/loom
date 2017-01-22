@@ -15,6 +15,7 @@ class CreateWebstuhlResourcesTable extends Migration
         Schema::create('webstuhl_resources', function (Blueprint $table) {
             $table->string('id')->index();
             $table->string('name')->unique();
+            $table->string('url');
             $table->timestamps();
         });
     }
