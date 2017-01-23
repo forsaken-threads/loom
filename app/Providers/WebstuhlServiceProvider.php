@@ -2,8 +2,7 @@
 
 namespace App\Providers;
 
-use App\Resources\WebstuhlResource;
-use App\WebstuhlHelper;
+use App\Webstuhl\Helper;
 use Illuminate\Support\ServiceProvider;
 use Webstuhl;
 
@@ -31,8 +30,8 @@ class WebstuhlServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(WebstuhlHelper::class, function() {
-            return new WebstuhlHelper();
+        $this->app->singleton(Helper::class, function() {
+            return new Helper();
         });
     }
 }

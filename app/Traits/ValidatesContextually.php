@@ -4,11 +4,11 @@ namespace App\Traits;
 
 trait ValidatesContextually
 {
-    abstract public function getValidationRules();
+    abstract public function getQualityControl();
 
     public function getValidationRulesForContext($context = '__default', $allRulesTogether = true, $input = [])
     {
-        $validations = $this->getValidationRules();
+        $validations = $this->getQualityControl();
         if (!isset($validations['__default'])) {
             throw new ValidationRulesDefaultNotFoundException($this->getNiceName() . ' does not have any default validation rules defined.');
         }

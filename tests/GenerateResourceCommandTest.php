@@ -1,13 +1,18 @@
 <?php
 
+namespace ForsakenThreads\Webstuhl\Tests;
+
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Mockery;
 use Mockery\MockInterface;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use Webstuhl;
 
 class GenerateResourceCommandTest extends TestCase
 {
-    use \Illuminate\Foundation\Testing\DatabaseTransactions;
+    use DatabaseTransactions;
 
     const BAD_RESOURCE_MODEL = '1';
     const BAD_RESOURCE_GROUP = '-';

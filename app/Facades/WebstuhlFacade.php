@@ -2,7 +2,7 @@
 
 namespace App\Facades;
 
-use App\WebstuhlHelper;
+use App\Webstuhl\Helper;
 use Illuminate\Support\Facades\Facade as BaseFacade;
 
 class WebstuhlFacade extends BaseFacade
@@ -14,6 +14,6 @@ class WebstuhlFacade extends BaseFacade
      */
     protected static function getFacadeAccessor()
     {
-        return WebstuhlHelper::class;
+        return Helper::class;
     }
 }

@@ -5,7 +5,6 @@ namespace App\Traits;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Fluent;
 use Ramsey\Uuid\Uuid;
-use Traits\ValidatesContextually;
 
 /**
  * Class Weavable

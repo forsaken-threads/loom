@@ -3,6 +3,7 @@
 namespace App\Resources;
 
 use App\Traits\Weavable;
+use App\Webstuhl\QualityControl;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -32,10 +33,12 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    public function getValidationRules()
+    /**
+     * @return QualityControl
+     */
+    public function getQualityControl()
     {
-        return [
-            'default' => [],
-        ];
+        return new QualityControl([
+        ]);
     }
 }

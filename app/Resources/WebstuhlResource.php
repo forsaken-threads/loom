@@ -3,7 +3,9 @@
 namespace App\Resources;
 
 use App\Traits\Weavable;
+use App\Webstuhl\QualityControl;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 
 class WebstuhlResource extends Model
 {
@@ -15,12 +17,21 @@ class WebstuhlResource extends Model
     protected $guarded = ['id'];
 
     /**
-     * @return array
+     * @return QualityControl
      */
-    public function getValidationRules()
+    public function getQualityControl()
     {
-        return [
-            'default' => [],
-        ];
+        $qc = new QualityControl([
+            'name' => 'string|max:100|',
+            'nickname' => ['regex:/^[A-Za-z0-9]{3,}$/'],
+            'email' => 'email',
+            'role' => Rule::in(['Admin', 'User', 'Guest'])
+        ]);
+        return $qc
+            ->forContext('create')
+                ->requireAll()
+                ->append(['nickname', 'email'], Rule::unique('users'))
+            ->forContext('update')
+                ->append(['nickname', 'email'], Rule::unique('users')->whereNot('id', $this->id));
     }
 }

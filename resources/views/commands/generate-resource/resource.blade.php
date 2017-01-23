@@ -3,6 +3,7 @@
 namespace App\Resources{{ $group }};
 
 use App\Traits\Weavable;
+use App\Webstuhl\QualityControl;
 use Illuminate\Database\Eloquent\Model;
 
 class {{ $name }} extends Model
@@ -14,11 +15,11 @@ class {{ $name }} extends Model
 
     /**
      * Get the contextual validation rules for the Webstuhl resource
+     * @return QualityControl
      */
-    public function getValidationRules()
+    public function getQualityControl()
     {
-        return [
-            'default' => [],
-        ];
+        $qc = new QualityControl([]);
+        return $qc;
     }
 }

@@ -1,7 +1,10 @@
 <?php
 
+namespace ForsakenThreads\Webstuhl\Tests;
+
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use Webstuhl;
 
 class ResourceControllerGenerationTest extends TestCase
 {

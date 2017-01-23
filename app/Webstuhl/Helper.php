@@ -1,12 +1,12 @@
 <?php
 
-namespace App;
+namespace App\Webstuhl;
 
 use App\Resources\WebstuhlResource;
 use DB;
 use Log;
 
-class WebstuhlHelper
+class Helper
 {
 
     /**

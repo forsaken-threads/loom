@@ -28,7 +28,9 @@ class RouteServiceProvider extends ServiceProvider
 
         if (\Webstuhl::isWeaving()) {
             $this->app->booted(function () {
-                Route::get('webstuhl', function() { return view('webstuhl.home'); });
+                Route::get('webstuhl', function() {
+                    return view('webstuhl.home');
+                });
             });
         }
     }

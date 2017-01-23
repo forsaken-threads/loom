@@ -1,11 +1,15 @@
 <?php
 
+namespace ForsakenThreads\Webstuhl\Tests;
+
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use Webstuhl;
 
 class ResourceGenerationTest extends TestCase
 {
-    use \Illuminate\Foundation\Testing\DatabaseTransactions;
+    use DatabaseTransactions;
 
     const RESOURCE_MODEL = 'TestResource';
     const RESOURCE_GROUP = 'TestResourceGroup';
