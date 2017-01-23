@@ -23,7 +23,7 @@ trait Weavable
         $input = new Fluent($input);
 //        list($sorts, $belongs_to_many_sorts) = $this->applySorts($input, $query);
 
-        $filters = $input->get('filters', 'none');
+        $filters = $input->get('filters');
         if (is_string($filters)) {
             $filters = json_decode($filters, true);
         }
@@ -33,14 +33,14 @@ trait Weavable
 //                'sorts' => $sorts,
 //                'belongs_to_many_sorts' => $belongs_to_many_sorts
             ];
-        } elseif (!$filters || !is_array($filters) || ! $this->getFiltersViaDefaultValidationRules($filters)) {
+        } elseif (!$filters || !is_array($filters) || ! $this->getValidFilters($filters)) {
             if (!empty($this->defaultFilter)) {
                 $filters = $this->defaultFilter;
             } elseif (method_exists($this, 'setDefaultFilter')) {
                 $filters = $this->setDefaultFilter();
             }
         }
-        $filters = $this->getFiltersViaDefaultValidationRules($filters);
+        $filters = $this->getValidFilters($filters);
         foreach ($filters as $property => $filter) {
             $this->applyFilter($filter, $property, $query);
         }

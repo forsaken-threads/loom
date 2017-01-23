@@ -21,6 +21,11 @@ class QualityControl
     protected $editingContext;
 
     /**
+     * @var array
+     */
+    protected $messages = [];
+
+    /**
      * QualityControl constructor.
      * @param array $defaultRules
      */
@@ -68,6 +73,14 @@ class QualityControl
             $this->contextualTransformations[$context] = [];
         }
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMessages()
+    {
+        return $this->messages;
     }
 
     /**
@@ -133,6 +146,15 @@ class QualityControl
         return $this;
     }
 
+    /**
+     * @param $messages
+     * @return $this
+     */
+    public function withMessages($messages)
+    {
+        $this->messages = $messages;
+        return $this;
+    }
     /**
      * @param $rules
      * @param $newRule
