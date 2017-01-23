@@ -1,5 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-Hello
+<div class="container-fluid"><div class="well well-lg">What will you fabricate?</div></div>
 @endsection
