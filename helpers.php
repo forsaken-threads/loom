@@ -1,6 +1,6 @@
 <?php
 
-function emptyish($variable)
+function nonZeroEmpty($variable)
 {
     if ($variable === 0 || $variable === '0' || $variable === (float) 0) {
         return false;
@@ -10,12 +10,12 @@ function emptyish($variable)
 
 function shallow($variable)
 {
-    if (emptyish($variable)) {
+    if (nonZeroEmpty($variable)) {
         return true;
     }
     if (is_array($variable)) {
         $variable = array_dot($variable);
-        return emptyish(implode($variable));
+        return nonZeroEmpty(implode($variable));
     }
     return false;
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Faker\Generator;
 use Illuminate\Http\Request;
 
 class WebstuhlController extends Controller

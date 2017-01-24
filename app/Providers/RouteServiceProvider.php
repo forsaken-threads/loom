@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-use Illuminate\Routing\Router;
 use Route;
 
 class RouteServiceProvider extends ServiceProvider
@@ -28,9 +27,7 @@ class RouteServiceProvider extends ServiceProvider
 
         if (\Webstuhl::isWeaving()) {
             $this->app->booted(function () {
-                Route::get('webstuhl', function() {
-                    return view('webstuhl.home');
-                });
+                Route::get('webstuhl', 'App\\Http\\Controllers\\WebstuhlController@home');
             });
         }
     }
