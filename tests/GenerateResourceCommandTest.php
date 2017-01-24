@@ -86,8 +86,6 @@ class GenerateResourceCommandTest extends TestCase
 
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
-        Mockery::close();
-
         $this->assertTrue($this->controllerPath->hasChild(self::RESOURCE_GROUP . DIRECTORY_SEPARATOR . self::RESOURCE_MODEL . 'Controller.php'));
         $this->assertTrue($this->resourcePath->hasChild(self::RESOURCE_GROUP . DIRECTORY_SEPARATOR . self::RESOURCE_MODEL . '.php'));
         $this->assertTrue($this->resourceRouteFilePath->hasChild('webstuhl.php'));
@@ -155,8 +153,6 @@ class GenerateResourceCommandTest extends TestCase
 
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
-        Mockery::close();
-
         $this->assertTrue($this->controllerPath->hasChild(self::RESOURCE_MODEL . 'Controller.php'));
         $this->assertTrue($this->resourcePath->hasChild(self::RESOURCE_MODEL . '.php'));
         $this->assertTrue($this->resourceRouteFilePath->hasChild('webstuhl.php'));
@@ -188,8 +184,6 @@ class GenerateResourceCommandTest extends TestCase
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
         $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
-
-        Mockery::close();
     }
 
     public function testBadNameRetry()
@@ -220,8 +214,6 @@ class GenerateResourceCommandTest extends TestCase
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
         $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
-
-        Mockery::close();
     }
 
     public function testBadNameRetryWithGoodName()
@@ -254,8 +246,6 @@ class GenerateResourceCommandTest extends TestCase
         $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
 
         $this->artisan('make:resource', ['--no-interaction' => true]);
-
-        Mockery::close();
 
         $this->assertTrue($this->controllerPath->hasChild(self::RESOURCE_MODEL_RETRY . 'Controller.php'));
         $this->assertTrue($this->resourcePath->hasChild(self::RESOURCE_MODEL_RETRY . '.php'));
@@ -292,8 +282,6 @@ class GenerateResourceCommandTest extends TestCase
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
         $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
-
-        Mockery::close();
     }
 
     public function testGoodNameBadGroupRetry()
@@ -328,8 +316,6 @@ class GenerateResourceCommandTest extends TestCase
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
         $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
-
-        Mockery::close();
     }
 
 }
