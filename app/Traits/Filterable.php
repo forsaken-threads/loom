@@ -22,9 +22,10 @@ trait Filterable
     /**
      * @param $givenFilters
      * @param Builder $query
+     * @param bool $orTogether
      * @return array|null
      */
-    public function applyFilters($givenFilters, Builder &$query)
+    public function applyFilters($givenFilters, Builder $query, $orTogether = false)
     {
         $filters = [];
         if (is_string($givenFilters)) {
@@ -44,7 +45,7 @@ trait Filterable
         }
         /** @var Filter[] $filters */
         foreach ($filters as $property => $filter) {
-            $filter->applyFilter($query);
+            $filter->applyFilter($query, $orTogether);
         }
         return $this->presentFilters($filters);
     }

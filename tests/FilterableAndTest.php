@@ -8,7 +8,7 @@ use ForsakenThreads\Webstuhl\Tests\TestHelpers\TestableResource;
 use Illuminate\Database\Schema\Blueprint;
 use Schema;
 
-class FilterableTest extends TestCase
+class FilterableAndTest extends TestCase
 {
     /** @var TestableResource */
     protected $resource;
