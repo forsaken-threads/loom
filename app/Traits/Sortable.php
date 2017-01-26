@@ -2,40 +2,146 @@
 
 namespace App\Traits;
 
-class Sortable
-{
-    public function applySorts($givenSorts, &$query)
-    {
-        $givenSorts = new Fluent($givenSorts);
-//        list($sorts, $belongs_to_many_sorts) = $this->applySorts($input, $query);
+use Illuminate\Database\Eloquent\Builder;
 
-        $filters = $givenSorts->get('filters');
-        if (is_string($filters)) {
-            $filters = json_decode($filters, true);
+trait Sortable
+{
+    /** @var array */
+    protected $defaultSort;
+
+    /**
+     * @param array $inputSorts
+     * @return array
+     */
+    abstract public function getSortableProperties(array $inputSorts);
+
+    public function applySorts($givenSorts, Builder $query)
+    {
+        $belongsToManySorts = [];
+        if (is_string($givenSorts)) {
+            $givenSorts = json_decode($givenSorts, true);
         }
-        if (!$filters || !is_array($filters)) {
-            if (empty($this->defaultFilter) && !method_exists($this, 'setDefaultFilter')) {
-                return [
-                    'filters' => null,
-//                'sorts' => $sorts,
-//                'belongs_to_many_sorts' => $belongs_to_many_sorts
-                ];
+        if (!$givenSorts || !is_array($givenSorts)) {
+            if (empty($this->defaultSort)) {
+                return [];
             }
-            if (!empty($this->defaultFilter)) {
-                $filters = $this->defaultFilter;
-            } elseif (method_exists($this, 'setDefaultFilter')) {
-                $filters = $this->setDefaultFilter();
+            $givenSorts = $this->defaultSort;
+        }
+        $orderedSorts = $this->getValidSorts($givenSorts);
+        foreach ($orderedSorts as $order => $orderedSort) {
+            foreach ($orderedSort as $property => $sort) {
+                $result = $this->applySort($sort, $property, $query);
+                foreach ($result as $belongsToMany => $belongsToManies) {
+                    if (empty($belongsToManySorts[$belongsToMany])) {
+                        $belongsToManySorts[$belongsToMany] = array();
+                    }
+                    foreach ($belongsToManies as $belongsToManySort) {
+                        $belongsToManySorts[$belongsToMany][] = $belongsToManySort;
+                    }
+                }
             }
+        }
+        return [$this->presentSorts($orderedSorts), $belongsToManySorts];
+    }
+
+    public function validateSorts(array $sortRules, array $givenSorts)
+    {
+        $returnSorts = [];
+        $properties = $this->getValidationRules('sort');
+        foreach ($inputSorts as $order => $sorts_given) {
+            $sorts = [];
+            $returnSorts[$order] = [];
+            foreach ($properties as $property => $ruleset) {
+                if (isset($sorts_given[$property])) {
+                    $sort = in_array($sorts_given[$property], ['asc', 'desc']) ? $sorts_given[$property] : 'asc';
+                    $sorts[$property] = $sort;
+                }
+            }
+            foreach ($this->getActiveEagerLinks() as $eager_link) {
+                if (!empty($sorts_given[snake_case($eager_link)])) {
+                    $eager_model_name = get_class($this->$eager_link()->getRelated());
+                    $eager_model = new $eager_model_name;
+                    $sorts[$eager_link] = $eager_model->getSortsViaDefaultValidationRules([$sorts_given[snake_case($eager_link)]]);
+                }
+            }
+            foreach ($sorts as $property => $sort) {
+                if (in_array($property, $this->getActiveEagerLinks())) {
+                    $returnSorts[$order]['__auto_eager_link'][$property] = $sorts[$property];
+                    continue;
+                }
+                $sort = in_array($sort, ['asc', 'desc']) ? $sort : 'asc';
+                $returnSorts[$order][$this->isPlaceHolderProperty($property) || in_array($property, $this->appends) ? $property : $this->property($property)] = $sort;
+            }
+        }
+        return $returnSorts;
+    }
+
+    protected function applySort($sort, $property, Builder &$query)
+    {
+//        static $eager_joins = [];
+
+        $belongsToManySorts = [];
+//        if ($property == '__auto_eager_link') {
+//            foreach ($sort as $eager_model => $eager_ordered_sorts) {
+//                $eager = studly_case($eager_model);
+//                if (!in_array($eager, $eager_joins)) {
+//                    $eager_joins[] = $eager;
+//                    switch (class_basename($this->$eager())) {
+//                        case 'BelongsTo':
+//                            $query->leftJoin($this->$eager()->getRelated()->getTableAlias(), $this->$eager()->getRelated()->property('id'), '=', $this->property($this->$eager()->getForeignKey()));
+//                            break;
+//                        case 'BelongsToMany':
+//                            $query->join($this->$eager()->getTable(), $this->property('id'), '=', $this->$eager()->getForeignKey());
+//                            $query->leftJoin($this->$eager()->getRelated()->getTableAlias(), $this->$eager()->getRelated()->property('id'), '=', $this->$eager()->getOtherKey());
+//                            if (!$query->getQuery()->groups) {
+//                                $query->groupBy($query->getModel()->property('id'));
+//                            }
+//                            break;
+//                        case 'HasMany':
+//                        case 'HasOne':
+//                            $query->leftJoin($this->$eager()->getRelated()->getTableAlias(), $this->property('id'), '=', $this->$eager()->getForeignKey());
+//                            break;
+//                        default:
+//                            throw new Exception('Sort handler missing for ' . class_basename($this->$eager()) . ' related resources');
+//                    }
+//                }
+//                foreach ($eager_ordered_sorts as $eager_order => $eager_sort) {
+//                    foreach ($eager_sort as $property => $sort) {
+//                        if (class_basename($this->$eager()) == 'BelongsToMany') {
+//                            if (empty($belongsToManySorts[$eager])) {
+//                                $belongsToManySorts[$eager] = [];
+//                            }
+//                            $query->orderByRaw("group_concat($property order by $property $sort) $sort");
+//                            $belongsToManySorts[$eager][] = [$property, $sort];
+//                        } else {
+//                            $this->applySort($sort, $property, $query);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        if (method_exists($this, 'orderBy' . studly_case($property))) {
+            call_user_func_array([$this, 'orderBy' . studly_case($property)], [$query, $sort]);
         } else {
-            $filters = $this->getValidFilters($filters);
+            $query->orderByRaw('cast(' . $property . ' as char) ' . $sort);
         }
-        foreach ($filters as $property => $filter) {
-            $this->applyFilter($filter, $property, $query);
+        return $belongsToManySorts;
+    }
+
+    protected function presentSorts($orderedSortsApplied)
+    {
+        $sorts = [];
+        foreach ($orderedSortsApplied as $order => $sortsApplied) {
+            foreach ($sortsApplied as $property => $sort) {
+//                if ($property == '__auto_eager_link') {
+//                    foreach ($sort as $eager_model => $eager_sorts) {
+//                        $sorts[$order] = empty($this->presentSorts($eager_sorts)) ? 'asc' : $this->presentSorts($eager_sorts)[0];
+//                    }
+//                    continue;
+//                }
+                $sorts[$order][$property] = $sort;
+            }
         }
-        return [
-            'filters' => $this->presentFilters($filters),
-//            'sorts' => $sorts,
-//            'belongs_to_many_sorts' => $belongs_to_many_sorts
-        ];
+        return $sorts;
     }
 }

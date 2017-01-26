@@ -6,7 +6,8 @@ use App\Webstuhl\QualityControl;
 
 trait QualityControllable
 {
-    use Filterable;
+    use Filterable,
+        Sortable;
 
     /**
      * @return QualityControl
@@ -63,6 +64,11 @@ trait QualityControllable
         return $this->validateFilters($filterRules, $inputFilters);
     }
 
+    public function getSortableProperties(array $inputSorts)
+    {
+        $sortRules = $this->getValidationRulesForContext('sort');
+        return $this->validateSorts($sortRules, $inputSorts);
+    }
     /**
      * @param $rule
      * @return bool
