@@ -1,7 +1,7 @@
 <?php
 
-use App\Webstuhl\QualityControl;
-use ForsakenThreads\Webstuhl\Tests\TestCase;
+use App\Loom\QualityControl;
+use ForsakenThreads\Loom\Tests\TestCase;
 use Illuminate\Validation\Rule;
 
 class QualityControlTest extends TestCase

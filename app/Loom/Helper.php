@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Webstuhl;
+namespace App\Loom;
 
-use App\Resources\WebstuhlResource;
+use App\Resources\LoomResource;
 use DB;
 use Log;
 
@@ -67,7 +67,7 @@ class Helper
 
         DB::beginTransaction();
         try {
-            WebstuhlResource::create([
+            LoomResource::create([
                 'name' => $this->getResourceClassName($name, $group),
                 'url' => $this->getResourceUrl($name, $group),
             ]);
@@ -75,7 +75,7 @@ class Helper
                 DB::rollBack();
                 return false;
             }
-            if (!file_put_contents($this->getResourceRouteFilePath('webstuhl.php'), view('commands.generate-resource.resource-routes'))) {
+            if (!file_put_contents($this->getResourceRouteFilePath('loom.php'), view('commands.generate-resource.resource-routes'))) {
                 DB::rollBack();
                 return false;
             }
@@ -190,7 +190,7 @@ class Helper
      */
     public function isWeaving()
     {
-        return !empty($_ENV['webstuhl-is-weaving']);
+        return !empty($_ENV['loom-is-weaving']);
     }
 
     /**

@@ -2,10 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Faker\Generator;
-use Illuminate\Http\Request;
-
-class WebstuhlController extends Controller
+class LoomController extends Controller
 {
     public function home()
     {

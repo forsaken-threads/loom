@@ -1,17 +1,30 @@
 <?php
 
-namespace ForsakenThreads\Webstuhl\Tests\TestHelpers;
+namespace ForsakenThreads\Loom\Tests\TestHelpers;
 
+use App\Contracts\DefaultFilterable;
 use App\Traits\Weavable;
-use App\Webstuhl\QualityControl;
+use App\Loom\Filter;
+use App\Loom\QualityControl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 
-class TestableResource extends Model
+class TestableResource extends Model implements DefaultFilterable
 {
     use Weavable;
 
     public $connection = 'testing';
+
+    /**
+     * @return Filter[]
+     */
+    public function getDefaultFilters()
+    {
+        return [
+            'rank' => new Filter(['0', '100'], 'rank', 'between'),
+            'level'=> new Filter(['50', '100'], 'level', 'between')
+        ];
+    }
 
     /**
      * @return QualityControl

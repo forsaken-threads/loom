@@ -1,10 +1,10 @@
 <?php
 
-namespace ForsakenThreads\Webstuhl\Tests;
+namespace ForsakenThreads\Loom\Tests;
 
-use App\Webstuhl\Filter;
+use App\Loom\Filter;
 use DB;
-use ForsakenThreads\Webstuhl\Tests\TestHelpers\TestableResource;
+use ForsakenThreads\Loom\Tests\TestHelpers\TestableResource;
 use Illuminate\Database\Schema\Blueprint;
 use Schema;
 
@@ -51,11 +51,11 @@ class FilterableOrTest extends TestCase
         ];
 
         $presented = [
-            'name' => 'like filter-name',
-            'nickname' => 'like any of: filter1-nickname, filter2-nickname',
-            'rank' => 'like 0',
-            'level' => 'like any of: 10, -5, 0',
-            'email' => 'like filter-email',
+            'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
+            'nickname' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . 'filter1-nickname, filter2-nickname',
+            'rank' => trans('quality-control.filterable.presenting.like') . '0',
+            'level' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . '10, -5, 0',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
         $query = [
@@ -80,7 +80,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -92,34 +92,34 @@ class FilterableOrTest extends TestCase
         $input['nickname'][0] = 'f';
         unset($output['nickname']);
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
     public function testExactlyFilters()
     {
         $input = [
-            'name' => ['exactly' => ['filter1-name', 'filter2-name']],
-            'nickname' => ['exactly' => 'filter-nickname'],
-            'rank' => ['exactly' => '0'],
-            'level' => ['exactly' => ['10', '-5', '0']],
+            'name' => [trans('quality-control.filterable.instructions.exactly') => ['filter1-name', 'filter2-name']],
+            'nickname' => [trans('quality-control.filterable.instructions.exactly') => 'filter-nickname'],
+            'rank' => [trans('quality-control.filterable.instructions.exactly') => '0'],
+            'level' => [trans('quality-control.filterable.instructions.exactly') => ['10', '-5', '0']],
             'email' => 'filter-email',
         ];
 
         $output = [
-            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', 'exactly'),
-            'nickname' => new Filter('filter-nickname', 'nickname', 'exactly'),
-            'rank' => new Filter('0', 'rank', 'exactly'),
-            'level' => new Filter(['10', '-5', '-0'], 'level', 'exactly'),
+            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', trans('quality-control.filterable.instructions.exactly')),
+            'nickname' => new Filter('filter-nickname', 'nickname', trans('quality-control.filterable.instructions.exactly')),
+            'rank' => new Filter('0', 'rank', trans('quality-control.filterable.instructions.exactly')),
+            'level' => new Filter(['10', '-5', '-0'], 'level', trans('quality-control.filterable.instructions.exactly')),
             'email' => new Filter('filter-email', 'email'),
         ];
 
         $presented = [
-            'name' => 'is any of: filter1-name, filter2-name',
-            'nickname' => 'is filter-nickname',
-            'rank' => 'is 0',
-            'level' => 'is any of: 10, -5, 0',
-            'email' => 'like filter-email',
+            'name' => trans('quality-control.filterable.presenting.is') . trans('quality-control.filterable.presenting.any of') . 'filter1-name, filter2-name',
+            'nickname' => trans('quality-control.filterable.presenting.is') . 'filter-nickname',
+            'rank' => trans('quality-control.filterable.presenting.is') . '0',
+            'level' => trans('quality-control.filterable.presenting.is') . trans('quality-control.filterable.presenting.any of') . '10, -5, 0',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
         $query = [
@@ -137,7 +137,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -146,40 +146,40 @@ class FilterableOrTest extends TestCase
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
 
-        $input['nickname']['exactly'] = '1';
+        $input['nickname'][trans('quality-control.filterable.instructions.exactly')] = '1';
         unset($output['nickname']);
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
     public function testNotExactlyFilters()
     {
         $input = [
-            'name' => ['notExactly' => ['filter1-name', 'filter2-name']],
-            'nickname' => ['notExactly' => 'filter-nickname'],
-            'rank' => ['notExactly' => '0'],
-            'level' => ['notExactly' => ['10', '-5', '0']],
+            'name' => [trans('quality-control.filterable.instructions.notExactly') => ['filter1-name', 'filter2-name']],
+            'nickname' => [trans('quality-control.filterable.instructions.notExactly') => 'filter-nickname'],
+            'rank' => [trans('quality-control.filterable.instructions.notExactly') => '0'],
+            'level' => [trans('quality-control.filterable.instructions.notExactly') => ['10', '-5', '0']],
             'email' => 'filter-email',
         ];
 
         $output = [
-            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', 'notExactly'),
-            'nickname' => new Filter('filter-nickname', 'nickname', 'notExactly'),
-            'rank' => new Filter('0', 'rank', 'notExactly'),
-            'level' => new Filter(['10', '-5', '-0'], 'level', 'notExactly'),
+            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', trans('quality-control.filterable.instructions.notExactly')),
+            'nickname' => new Filter('filter-nickname', 'nickname', trans('quality-control.filterable.instructions.notExactly')),
+            'rank' => new Filter('0', 'rank', trans('quality-control.filterable.instructions.notExactly')),
+            'level' => new Filter(['10', '-5', '-0'], 'level', trans('quality-control.filterable.instructions.notExactly')),
             'email' => new Filter('filter-email', 'email'),
         ];
 
         $presented = [
-            'name' => 'is not any of: filter1-name, filter2-name',
-            'nickname' => 'is not filter-nickname',
-            'rank' => 'is not 0',
-            'level' => 'is not any of: 10, -5, 0',
-            'email' => 'like filter-email',
+            'name' => trans('quality-control.filterable.presenting.is not') . trans('quality-control.filterable.presenting.any of') . 'filter1-name, filter2-name',
+            'nickname' => trans('quality-control.filterable.presenting.is not') . 'filter-nickname',
+            'rank' => trans('quality-control.filterable.presenting.is not') . '0',
+            'level' => trans('quality-control.filterable.presenting.is not') . trans('quality-control.filterable.presenting.any of') . '10, -5, 0',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $query = [
@@ -203,37 +203,37 @@ class FilterableOrTest extends TestCase
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
 
-        $input['nickname']['notExactly'] = '1';
+        $input['nickname'][trans('quality-control.filterable.instructions.notExactly')] = '1';
         unset($output['nickname']);
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
     public function testNotFilters()
     {
         $input = [
-            'name' => ['not' => ['filter1-name', 'filter2-name']],
-            'nickname' => ['not' => 'filter-nickname'],
-            'rank' => ['not' => '0'],
-            'level' => ['not' => ['10', '-5', '0']],
+            'name' => [trans('quality-control.filterable.instructions.not') => ['filter1-name', 'filter2-name']],
+            'nickname' => [trans('quality-control.filterable.instructions.not') => 'filter-nickname'],
+            'rank' => [trans('quality-control.filterable.instructions.not') => '0'],
+            'level' => [trans('quality-control.filterable.instructions.not') => ['10', '-5', '0']],
             'email' => 'filter-email',
         ];
 
         $output = [
-            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', 'not'),
-            'nickname' => new Filter('filter-nickname', 'nickname', 'not'),
-            'rank' => new Filter('0', 'rank', 'not'),
-            'level' => new Filter(['10', '-5', '0'], 'level', 'not'),
+            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', trans('quality-control.filterable.instructions.not')),
+            'nickname' => new Filter('filter-nickname', 'nickname', trans('quality-control.filterable.instructions.not')),
+            'rank' => new Filter('0', 'rank', trans('quality-control.filterable.instructions.not')),
+            'level' => new Filter(['10', '-5', '0'], 'level', trans('quality-control.filterable.instructions.not')),
             'email' => new Filter('filter-email', 'email'),
         ];
 
         $presented = [
-            'name' => 'not like any of: filter1-name, filter2-name',
-            'nickname' => 'not like filter-nickname',
-            'rank' => 'not like 0',
-            'level' => 'not like any of: 10, -5, 0',
-            'email' => 'like filter-email',
+            'name' => trans('quality-control.filterable.presenting.not like') . trans('quality-control.filterable.presenting.any of') . 'filter1-name, filter2-name',
+            'nickname' => trans('quality-control.filterable.presenting.not like') . 'filter-nickname',
+            'rank' => trans('quality-control.filterable.presenting.not like') . '0',
+            'level' => trans('quality-control.filterable.presenting.not like') . trans('quality-control.filterable.presenting.any of') . '10, -5, 0',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
         $query = [
@@ -258,7 +258,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -267,37 +267,37 @@ class FilterableOrTest extends TestCase
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
 
-        $input['nickname']['not'] = '1';
+        $input['nickname'][trans('quality-control.filterable.instructions.not')] = '1';
         unset($output['nickname']);
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
     public function testBetweenFilters()
     {
         $input = [
-            'name' => ['between' => ['filter1-name', 'filter2-name']],
-            'nickname' => ['between' => ['filter1-nickname', 'filter2-nickname']],
-            'rank' => ['between' => ['0', '50']],
-            'level' => ['between' => ['-50', '0']],
+            'name' => [trans('quality-control.filterable.instructions.between') => ['filter1-name', 'filter2-name']],
+            'nickname' => [trans('quality-control.filterable.instructions.between') => ['filter1-nickname', 'filter2-nickname']],
+            'rank' => [trans('quality-control.filterable.instructions.between') => ['0', '50']],
+            'level' => [trans('quality-control.filterable.instructions.between') => ['-50', '0']],
             'email' => 'filter-email',
         ];
 
         $output = [
-            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', 'between'),
-            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname', 'between'),
-            'rank' => new Filter(['0', '50'], 'rank', 'between'),
-            'level' => new Filter(['-50', '0'], 'level', 'between'),
+            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', trans('quality-control.filterable.instructions.between')),
+            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname', trans('quality-control.filterable.instructions.between')),
+            'rank' => new Filter(['0', '50'], 'rank', trans('quality-control.filterable.instructions.between')),
+            'level' => new Filter(['-50', '0'], 'level', trans('quality-control.filterable.instructions.between')),
             'email' => new Filter('filter-email', 'email'),
         ];
 
         $presented = [
-            'name' => 'between filter1-name and filter2-name',
-            'nickname' => 'between filter1-nickname and filter2-nickname',
-            'rank' => 'between 0 and 50',
-            'level' => 'between -50 and 0',
-            'email' => 'like filter-email',
+            'name' => trans('quality-control.filterable.presenting.between', ['filter1-name', 'filter2-name']),
+            'nickname' => trans('quality-control.filterable.presenting.between', ['filter1-nickname', 'filter2-nickname']),
+            'rank' => trans('quality-control.filterable.presenting.between', [0, 50]),
+            'level' => trans('quality-control.filterable.presenting.between', [-50, 0]),
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
         $query = [
@@ -316,7 +316,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -325,39 +325,39 @@ class FilterableOrTest extends TestCase
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
 
-        unset($input['name']['between'][0]);
-        $input['nickname']['between'][0] = '1';
+        unset($input['name'][trans('quality-control.filterable.instructions.between')][0]);
+        $input['nickname'][trans('quality-control.filterable.instructions.between')][0] = '1';
         unset($output['name']);
         unset($output['nickname']);
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
     public function testNotBetweenFilters()
     {
         $input = [
-            'name' => ['notBetween' => ['filter1-name', 'filter2-name']],
-            'nickname' => ['notBetween' => ['filter1-nickname', 'filter2-nickname']],
-            'rank' => ['notBetween' => ['0', '50']],
-            'level' => ['notBetween' => ['-50', '0']],
+            'name' => [trans('quality-control.filterable.instructions.notBetween') => ['filter1-name', 'filter2-name']],
+            'nickname' => [trans('quality-control.filterable.instructions.notBetween') => ['filter1-nickname', 'filter2-nickname']],
+            'rank' => [trans('quality-control.filterable.instructions.notBetween') => ['0', '50']],
+            'level' => [trans('quality-control.filterable.instructions.notBetween') => ['-50', '0']],
             'email' => 'filter-email',
         ];
 
         $output = [
-            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', 'notBetween'),
-            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname', 'notBetween'),
-            'rank' => new Filter(['0', '50'], 'rank', 'notBetween'),
-            'level' => new Filter(['-50', '0'], 'level', 'notBetween'),
+            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', trans('quality-control.filterable.instructions.notBetween')),
+            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname', trans('quality-control.filterable.instructions.notBetween')),
+            'rank' => new Filter(['0', '50'], 'rank', trans('quality-control.filterable.instructions.notBetween')),
+            'level' => new Filter(['-50', '0'], 'level', trans('quality-control.filterable.instructions.notBetween')),
             'email' => new Filter('filter-email', 'email'),
         ];
 
         $presented = [
-            'name' => 'not between filter1-name and filter2-name',
-            'nickname' => 'not between filter1-nickname and filter2-nickname',
-            'rank' => 'not between 0 and 50',
-            'level' => 'not between -50 and 0',
-            'email' => 'like filter-email',
+            'name' => trans('quality-control.filterable.presenting.not between', ['filter1-name', 'filter2-name']),
+            'nickname' => trans('quality-control.filterable.presenting.not between', ['filter1-nickname', 'filter2-nickname']),
+            'rank' => trans('quality-control.filterable.presenting.not between', [0, 50]),
+            'level' => trans('quality-control.filterable.presenting.not between', [-50, 0]),
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
         $query = [
@@ -372,7 +372,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -381,30 +381,30 @@ class FilterableOrTest extends TestCase
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
 
-        unset($input['name']['notBetween'][0]);
-        $input['nickname']['notBetween'][0] = '1';
+        unset($input['name'][trans('quality-control.filterable.instructions.notBetween')][0]);
+        $input['nickname'][trans('quality-control.filterable.instructions.notBetween')][0] = '1';
         unset($output['name']);
         unset($output['nickname']);
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
     public function testGreaterThanFilters()
     {
         $input = [
-            'name' => ['between' => ['filter1-name', '']],
-            'nickname' => ['between' => ['filter1-nickname', '']],
-            'rank' => ['between' => ['0', '']],
-            'level' => ['between' => ['-50', '']],
+            'name' => [trans('quality-control.filterable.instructions.between') => ['filter1-name', '']],
+            'nickname' => [trans('quality-control.filterable.instructions.between') => ['filter1-nickname', '']],
+            'rank' => [trans('quality-control.filterable.instructions.between') => ['0', '']],
+            'level' => [trans('quality-control.filterable.instructions.between') => ['-50', '']],
             'email' => 'filter-email',
         ];
 
         $output = [
-            'name' => new Filter(['filter1-name', ''], 'name', 'between'),
-            'nickname' => new Filter(['filter1-nickname', ''], 'nickname', 'between'),
-            'rank' => new Filter(['0', ''], 'rank', 'between'),
-            'level' => new Filter(['-50', ''], 'level', 'between'),
+            'name' => new Filter(['filter1-name', ''], 'name', trans('quality-control.filterable.instructions.between')),
+            'nickname' => new Filter(['filter1-nickname', ''], 'nickname', trans('quality-control.filterable.instructions.between')),
+            'rank' => new Filter(['0', ''], 'rank', trans('quality-control.filterable.instructions.between')),
+            'level' => new Filter(['-50', ''], 'level', trans('quality-control.filterable.instructions.between')),
             'email' => new Filter('filter-email', 'email'),
         ];
 
@@ -413,7 +413,7 @@ class FilterableOrTest extends TestCase
             'nickname' => '>= filter1-nickname',
             'rank' => '>= 0',
             'level' => '>= -50',
-            'email' => 'like filter-email',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
         $query = [
@@ -428,7 +428,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -437,30 +437,30 @@ class FilterableOrTest extends TestCase
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
 
-        unset($input['name']['between'][0]);
-        $input['nickname']['between'][0] = '1';
+        unset($input['name'][trans('quality-control.filterable.instructions.between')][0]);
+        $input['nickname'][trans('quality-control.filterable.instructions.between')][0] = '1';
         unset($output['name']);
         unset($output['nickname']);
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
     public function testNotGreaterThanFilters()
     {
         $input = [
-            'name' => ['notBetween' => ['filter1-name', '']],
-            'nickname' => ['notBetween' => ['filter1-nickname', '']],
-            'rank' => ['notBetween' => ['0', '']],
-            'level' => ['notBetween' => ['-50', '']],
+            'name' => [trans('quality-control.filterable.instructions.notBetween') => ['filter1-name', '']],
+            'nickname' => [trans('quality-control.filterable.instructions.notBetween') => ['filter1-nickname', '']],
+            'rank' => [trans('quality-control.filterable.instructions.notBetween') => ['0', '']],
+            'level' => [trans('quality-control.filterable.instructions.notBetween') => ['-50', '']],
             'email' => 'filter-email',
         ];
 
         $output = [
-            'name' => new Filter(['filter1-name', ''], 'name', 'notBetween'),
-            'nickname' => new Filter(['filter1-nickname', ''], 'nickname', 'notBetween'),
-            'rank' => new Filter(['0', ''], 'rank', 'notBetween'),
-            'level' => new Filter(['-50', ''], 'level', 'notBetween'),
+            'name' => new Filter(['filter1-name', ''], 'name', trans('quality-control.filterable.instructions.notBetween')),
+            'nickname' => new Filter(['filter1-nickname', ''], 'nickname', trans('quality-control.filterable.instructions.notBetween')),
+            'rank' => new Filter(['0', ''], 'rank', trans('quality-control.filterable.instructions.notBetween')),
+            'level' => new Filter(['-50', ''], 'level', trans('quality-control.filterable.instructions.notBetween')),
             'email' => new Filter('filter-email', 'email'),
         ];
 
@@ -469,7 +469,7 @@ class FilterableOrTest extends TestCase
             'nickname' => '< filter1-nickname',
             'rank' => '< 0',
             'level' => '< -50',
-            'email' => 'like filter-email',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
         $query = [
@@ -484,7 +484,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -493,30 +493,30 @@ class FilterableOrTest extends TestCase
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
 
-        unset($input['name']['notBetween'][0]);
-        $input['nickname']['notBetween'][0] = '1';
+        unset($input['name'][trans('quality-control.filterable.instructions.notBetween')][0]);
+        $input['nickname'][trans('quality-control.filterable.instructions.notBetween')][0] = '1';
         unset($output['name']);
         unset($output['nickname']);
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
     public function testLessThanFilters()
     {
         $input = [
-            'name' => ['between' => ['', 'filter1-name']],
-            'nickname' => ['between' => ['', 'filter1-nickname']],
-            'rank' => ['between' => ['', '0']],
-            'level' => ['between' => ['', '50']],
+            'name' => [trans('quality-control.filterable.instructions.between') => ['', 'filter1-name']],
+            'nickname' => [trans('quality-control.filterable.instructions.between') => ['', 'filter1-nickname']],
+            'rank' => [trans('quality-control.filterable.instructions.between') => ['', '0']],
+            'level' => [trans('quality-control.filterable.instructions.between') => ['', '50']],
             'email' => 'filter-email',
         ];
 
         $output = [
-            'name' => new Filter(['', 'filter1-name'], 'name', 'between'),
-            'nickname' => new Filter(['', 'filter1-nickname'], 'nickname', 'between'),
-            'rank' => new Filter(['', '0'], 'rank', 'between'),
-            'level' => new Filter(['', '50'], 'level', 'between'),
+            'name' => new Filter(['', 'filter1-name'], 'name', trans('quality-control.filterable.instructions.between')),
+            'nickname' => new Filter(['', 'filter1-nickname'], 'nickname', trans('quality-control.filterable.instructions.between')),
+            'rank' => new Filter(['', '0'], 'rank', trans('quality-control.filterable.instructions.between')),
+            'level' => new Filter(['', '50'], 'level', trans('quality-control.filterable.instructions.between')),
             'email' => new Filter('filter-email', 'email'),
         ];
 
@@ -525,7 +525,7 @@ class FilterableOrTest extends TestCase
             'nickname' => '<= filter1-nickname',
             'rank' => '<= 0',
             'level' => '<= 50',
-            'email' => 'like filter-email',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
         $query = [
@@ -540,7 +540,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -549,30 +549,30 @@ class FilterableOrTest extends TestCase
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
 
-        unset($input['name']['between'][1]);
-        $input['nickname']['between'][1] = '1';
+        unset($input['name'][trans('quality-control.filterable.instructions.between')][1]);
+        $input['nickname'][trans('quality-control.filterable.instructions.between')][1] = '1';
         unset($output['name']);
         unset($output['nickname']);
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
     public function testNotLessThanFilters()
     {
         $input = [
-            'name' => ['notBetween' => ['', 'filter1-name']],
-            'nickname' => ['notBetween' => ['', 'filter1-nickname']],
-            'rank' => ['notBetween' => ['', '0']],
-            'level' => ['notBetween' => ['', '50']],
+            'name' => [trans('quality-control.filterable.instructions.notBetween') => ['', 'filter1-name']],
+            'nickname' => [trans('quality-control.filterable.instructions.notBetween') => ['', 'filter1-nickname']],
+            'rank' => [trans('quality-control.filterable.instructions.notBetween') => ['', '0']],
+            'level' => [trans('quality-control.filterable.instructions.notBetween') => ['', '50']],
             'email' => 'filter-email',
         ];
 
         $output = [
-            'name' => new Filter(['', 'filter1-name'], 'name', 'notBetween'),
-            'nickname' => new Filter(['', 'filter1-nickname'], 'nickname', 'notBetween'),
-            'rank' => new Filter(['', '0'], 'rank', 'notBetween'),
-            'level' => new Filter(['', '50'], 'level', 'notBetween'),
+            'name' => new Filter(['', 'filter1-name'], 'name', trans('quality-control.filterable.instructions.notBetween')),
+            'nickname' => new Filter(['', 'filter1-nickname'], 'nickname', trans('quality-control.filterable.instructions.notBetween')),
+            'rank' => new Filter(['', '0'], 'rank', trans('quality-control.filterable.instructions.notBetween')),
+            'level' => new Filter(['', '50'], 'level', trans('quality-control.filterable.instructions.notBetween')),
             'email' => new Filter('filter-email', 'email'),
         ];
 
@@ -581,7 +581,7 @@ class FilterableOrTest extends TestCase
             'nickname' => '> filter1-nickname',
             'rank' => '> 0',
             'level' => '> 50',
-            'email' => 'like filter-email',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
         $query = [
@@ -596,7 +596,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -605,12 +605,12 @@ class FilterableOrTest extends TestCase
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
 
-        unset($input['name']['notBetween'][1]);
-        $input['nickname']['notBetween'][1] = '1';
+        unset($input['name'][trans('quality-control.filterable.instructions.notBetween')][1]);
+        $input['nickname'][trans('quality-control.filterable.instructions.notBetween')][1] = '1';
         unset($output['name']);
         unset($output['nickname']);
 
-        $result = $this->resource->getValidFilters($input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 }

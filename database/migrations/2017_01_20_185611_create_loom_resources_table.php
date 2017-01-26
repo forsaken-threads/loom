@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateWebstuhlResourcesTable extends Migration
+class CreateLoomResourcesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -12,7 +12,7 @@ class CreateWebstuhlResourcesTable extends Migration
      */
     public function up()
     {
-        Schema::create('webstuhl_resources', function (Blueprint $table) {
+        Schema::create('loom_resources', function (Blueprint $table) {
             $table->string('id')->index();
             $table->string('name')->unique();
             $table->string('url');
@@ -27,6 +27,6 @@ class CreateWebstuhlResourcesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('webstuhl_resources');
+        Schema::dropIfExists('loom_resources');
     }
 }

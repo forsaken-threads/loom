@@ -25,9 +25,9 @@ class RouteServiceProvider extends ServiceProvider
     {
         parent::boot();
 
-        if (\Webstuhl::isWeaving()) {
+        if (\Loom::isWeaving()) {
             $this->app->booted(function () {
-                Route::get('webstuhl', 'App\\Http\\Controllers\\WebstuhlController@home');
+                Route::get('loom', 'App\\Http\\Controllers\\LoomController@home');
             });
         }
     }
@@ -43,7 +43,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->mapWebRoutes();
 
-        $this->mapWebstuhlResourceRoutes();
+        $this->mapLoomResourceRoutes();
     }
 
     /**
@@ -86,13 +86,13 @@ class RouteServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function mapWebstuhlResourceRoutes()
+    protected function mapLoomResourceRoutes()
     {
         Route::group([
             'middleware' => ['web', 'auth'],
-            'namespace' => \Webstuhl::getResourceControllerNamespace(),
+            'namespace' => \Loom::getResourceControllerNamespace(),
         ], function ($router) {
-            require base_path('routes/webstuhl.php');
+            require base_path('routes/loom.php');
         });
     }
 }

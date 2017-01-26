@@ -1,6 +1,6 @@
 <?php
 
-namespace ForsakenThreads\Webstuhl\Tests;
+namespace ForsakenThreads\Loom\Tests;
 
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -8,7 +8,7 @@ use Mockery;
 use Mockery\MockInterface;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
-use Webstuhl;
+use Loom;
 
 class GenerateResourceCommandTest extends TestCase
 {
@@ -58,9 +58,9 @@ class GenerateResourceCommandTest extends TestCase
         $this->resourcePath = $this->vfsRoot->getChild('resources');
         $this->resourceRouteFilePath = $this->vfsRoot->getChild('routes');
 
-        Webstuhl::setResourceControllerBasePath($this->controllerPath->url());
-        Webstuhl::setResourceBasePath($this->resourcePath->url());
-        Webstuhl::setResourceRouteFilePath($this->resourceRouteFilePath->url());
+        Loom::setResourceControllerBasePath($this->controllerPath->url());
+        Loom::setResourceBasePath($this->resourcePath->url());
+        Loom::setResourceRouteFilePath($this->resourceRouteFilePath->url());
     }
 
     public function testGoodNameGoodGroup()
@@ -82,13 +82,13 @@ class GenerateResourceCommandTest extends TestCase
 
         $this->command->shouldNotReceive('error');
 
-        $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
+        $this->assertFalse($this->resourceRouteFilePath->hasChild('loom.php'));
 
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
         $this->assertTrue($this->controllerPath->hasChild(self::RESOURCE_GROUP . DIRECTORY_SEPARATOR . self::RESOURCE_MODEL . 'Controller.php'));
         $this->assertTrue($this->resourcePath->hasChild(self::RESOURCE_GROUP . DIRECTORY_SEPARATOR . self::RESOURCE_MODEL . '.php'));
-        $this->assertTrue($this->resourceRouteFilePath->hasChild('webstuhl.php'));
+        $this->assertTrue($this->resourceRouteFilePath->hasChild('loom.php'));
 
 
         $this->vfsRoot->removeChild('resources/' . self::RESOURCE_GROUP);
@@ -100,11 +100,11 @@ class GenerateResourceCommandTest extends TestCase
 
     public function testGoodNameGoodGroupRejectGroupCreation()
     {
-        Webstuhl::shouldReceive('getResourceBasePath')->once()->andReturn($this->resourcePath->url() . DIRECTORY_SEPARATOR . self::RESOURCE_GROUP);
-        Webstuhl::shouldReceive('createResource')->never();
-        Webstuhl::shouldReceive('createResourceController')->never();
-        Webstuhl::shouldReceive('resourceControllerExists')->never();
-        Webstuhl::shouldReceive('resourceExists')->never();
+        Loom::shouldReceive('getResourceBasePath')->once()->andReturn($this->resourcePath->url() . DIRECTORY_SEPARATOR . self::RESOURCE_GROUP);
+        Loom::shouldReceive('createResource')->never();
+        Loom::shouldReceive('createResourceController')->never();
+        Loom::shouldReceive('resourceControllerExists')->never();
+        Loom::shouldReceive('resourceExists')->never();
 
         $this->command->shouldReceive('ask')
             ->once()
@@ -130,7 +130,7 @@ class GenerateResourceCommandTest extends TestCase
 
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
-        $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
+        $this->assertFalse($this->resourceRouteFilePath->hasChild('loom.php'));
 
         Mockery::close();
     }
@@ -149,13 +149,13 @@ class GenerateResourceCommandTest extends TestCase
 
         $this->command->shouldNotReceive('error');
 
-        $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
+        $this->assertFalse($this->resourceRouteFilePath->hasChild('loom.php'));
 
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
         $this->assertTrue($this->controllerPath->hasChild(self::RESOURCE_MODEL . 'Controller.php'));
         $this->assertTrue($this->resourcePath->hasChild(self::RESOURCE_MODEL . '.php'));
-        $this->assertTrue($this->resourceRouteFilePath->hasChild('webstuhl.php'));
+        $this->assertTrue($this->resourceRouteFilePath->hasChild('loom.php'));
 
 
         $this->controllerPath->removeChild(self::RESOURCE_GROUP);
@@ -164,8 +164,8 @@ class GenerateResourceCommandTest extends TestCase
 
     public function testBadName()
     {
-        Webstuhl::shouldReceive('createResource')->never();
-        Webstuhl::shouldReceive('createResourceController')->never();
+        Loom::shouldReceive('createResource')->never();
+        Loom::shouldReceive('createResourceController')->never();
 
         $this->command->shouldReceive('ask')
             ->once()
@@ -183,14 +183,14 @@ class GenerateResourceCommandTest extends TestCase
 
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
-        $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
+        $this->assertFalse($this->resourceRouteFilePath->hasChild('loom.php'));
     }
 
     public function testBadNameRetry()
     {
 
-        Webstuhl::shouldReceive('createResource')->never();
-        Webstuhl::shouldReceive('createResourceController')->never();
+        Loom::shouldReceive('createResource')->never();
+        Loom::shouldReceive('createResourceController')->never();
 
         $this->command->shouldReceive('ask')
             ->twice()
@@ -213,7 +213,7 @@ class GenerateResourceCommandTest extends TestCase
 
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
-        $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
+        $this->assertFalse($this->resourceRouteFilePath->hasChild('loom.php'));
     }
 
     public function testBadNameRetryWithGoodName()
@@ -243,13 +243,13 @@ class GenerateResourceCommandTest extends TestCase
             ->with(trans('commands/generate-resource.ask-for-group'))
             ->andReturn(self::RESOURCE_NO_GROUP);
 
-        $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
+        $this->assertFalse($this->resourceRouteFilePath->hasChild('loom.php'));
 
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
         $this->assertTrue($this->controllerPath->hasChild(self::RESOURCE_MODEL_RETRY . 'Controller.php'));
         $this->assertTrue($this->resourcePath->hasChild(self::RESOURCE_MODEL_RETRY . '.php'));
-        $this->assertTrue($this->resourceRouteFilePath->hasChild('webstuhl.php'));
+        $this->assertTrue($this->resourceRouteFilePath->hasChild('loom.php'));
 
         $this->controllerPath->removeChild(self::RESOURCE_GROUP);
         $this->resourcePath->removeChild(self::RESOURCE_GROUP);
@@ -257,8 +257,8 @@ class GenerateResourceCommandTest extends TestCase
 
     public function testGoodNameBadGroup()
     {
-        Webstuhl::shouldReceive('createResource')->never();
-        Webstuhl::shouldReceive('createResourceController')->never();
+        Loom::shouldReceive('createResource')->never();
+        Loom::shouldReceive('createResourceController')->never();
 
         $this->command->shouldReceive('ask')
             ->once()
@@ -281,13 +281,13 @@ class GenerateResourceCommandTest extends TestCase
 
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
-        $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
+        $this->assertFalse($this->resourceRouteFilePath->hasChild('loom.php'));
     }
 
     public function testGoodNameBadGroupRetry()
     {
-        Webstuhl::shouldReceive('createResource')->never();
-        Webstuhl::shouldReceive('createResourceController')->never();
+        Loom::shouldReceive('createResource')->never();
+        Loom::shouldReceive('createResourceController')->never();
 
         $this->command->shouldReceive('ask')
             ->once()
@@ -315,7 +315,7 @@ class GenerateResourceCommandTest extends TestCase
 
         $this->artisan('make:resource', ['--no-interaction' => true]);
 
-        $this->assertFalse($this->resourceRouteFilePath->hasChild('webstuhl.php'));
+        $this->assertFalse($this->resourceRouteFilePath->hasChild('loom.php'));
     }
 
 }

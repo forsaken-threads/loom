@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use App\Resources\WebstuhlResource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -11,7 +10,7 @@ trait WeavesResources
 {
 
     /**
-     * Show the form for creating a new Webstuhl resource.
+     * Show the form for creating a new Loom resource.
      *
      * @return Response
      */
@@ -21,7 +20,7 @@ trait WeavesResources
     }
 
     /**
-     * Remove the specified Webstuhl resource from storage.
+     * Remove the specified Loom resource from storage.
      *
      * @param  string  $id
      * @return Response
@@ -32,7 +31,7 @@ trait WeavesResources
     }
 
     /**
-     * Show the form for editing the Webstuhl specified resource.
+     * Show the form for editing the Loom specified resource.
      *
      * @param  string  $id
      * @return Response
@@ -43,7 +42,7 @@ trait WeavesResources
     }
 
     /**
-     * Display a listing of the Webstuhl resource.
+     * Display a listing of the Loom resource.
      *
      * @return Response
      */
@@ -56,7 +55,7 @@ trait WeavesResources
 
 
     /**
-     * Display the specified Webstuhl resource.
+     * Display the specified Loom resource.
      *
      * @param  string  $id
      * @return Response
@@ -68,7 +67,7 @@ trait WeavesResources
     }
 
     /**
-     * Store a newly created Webstuhl resource in storage.
+     * Store a newly created Loom resource in storage.
      *
      * @param  Request  $request
      * @return Response
@@ -79,7 +78,7 @@ trait WeavesResources
     }
 
     /**
-     * Update the specified Webstuhl resource in storage.
+     * Update the specified Loom resource in storage.
      *
      * @param  Request  $request
      * @param  string  $id
@@ -92,8 +91,8 @@ trait WeavesResources
 
     protected function getResourceClassName()
     {
-        return \Webstuhl::getResourceNamespace() . str_replace(
-            [\Webstuhl::getResourceControllerNamespace(), 'Controller'], '', static::class
+        return \Loom::getResourceNamespace() . str_replace(
+            [\Loom::getResourceControllerNamespace(), 'Controller'], '', static::class
         );
     }
 }

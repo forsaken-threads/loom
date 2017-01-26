@@ -3,7 +3,7 @@
 namespace App\Resources;
 
 use App\Traits\Weavable;
-use App\Webstuhl\QualityControl;
+use App\Loom\QualityControl;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 

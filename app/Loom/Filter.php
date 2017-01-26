@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Webstuhl;
+namespace App\Loom;
 
+use App\Contracts\Filter as FilterContract;
 use Illuminate\Database\Eloquent\Builder;
 
-class Filter
+class Filter implements FilterContract
 {
     protected $comparator;
 
@@ -143,7 +144,7 @@ class Filter
             case 'between':
                 // pass-through
             case 'not between':
-                return $this->comparator . ' ' . implode(' and ', $this->filter);
+                return trans('quality-control.filterable.presenting.' . $this->comparator, $this->filter);
             case '<':
                 // pass-through
             case '>=':
@@ -156,14 +157,14 @@ class Filter
                 break;
 
             case 'not like':
-                return 'not like ' . (is_array($this->filter) ? 'any of: ' . implode(', ', $this->filter) : $this->filter);
+                return trans('quality-control.filterable.presenting.not like') . (is_array($this->filter) ? trans('quality-control.filterable.presenting.any of') . implode(', ', $this->filter) : $this->filter);
             case 'like':
-                return 'like ' . (is_array($this->filter) ? 'any of: ' . implode(', ', $this->filter) : $this->filter);
+                return trans('quality-control.filterable.presenting.like') . (is_array($this->filter) ? trans('quality-control.filterable.presenting.any of') . implode(', ', $this->filter) : $this->filter);
 
             case 'equals':
-                return 'is ' . (is_array($this->filter) ? 'any of: ' . implode(', ', $this->filter) : $this->filter);
+                return trans('quality-control.filterable.presenting.is') . (is_array($this->filter) ? trans('quality-control.filterable.presenting.any of') . implode(', ', $this->filter) : $this->filter);
             case 'not equals':
-                return 'is not ' . (is_array($this->filter) ? 'any of: ' . implode(', ', $this->filter) : $this->filter);
+                return trans('quality-control.filterable.presenting.is not') . (is_array($this->filter) ? trans('quality-control.filterable.presenting.any of') . implode(', ', $this->filter) : $this->filter);
 
             default:
                 return $this->filter;

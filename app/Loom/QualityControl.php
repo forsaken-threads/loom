@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Webstuhl;
+namespace App\Loom;
 
 class QualityControl
 {

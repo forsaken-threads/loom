@@ -1,10 +1,10 @@
 <?php
 
-namespace ForsakenThreads\Webstuhl\Tests;
+namespace ForsakenThreads\Loom\Tests;
 
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
-use Webstuhl;
+use Loom;
 
 class ResourceControllerGenerationTest extends TestCase
 {
@@ -29,30 +29,30 @@ class ResourceControllerGenerationTest extends TestCase
         $this->vfsRoot = vfsStream::setup('scratch', null, ['controllers' => []]);
         $this->controllerPath = $this->vfsRoot->getChild('controllers');
 
-        Webstuhl::setResourceControllerBasePath($this->vfsRoot->getChild('controllers')->url());
+        Loom::setResourceControllerBasePath($this->vfsRoot->getChild('controllers')->url());
 
     }
 
     public function testControllerBasePath()
     {
-        $this->assertEquals($this->controllerPath->url(), Webstuhl::getResourceControllerBasePath());
-        $this->assertDirectoryExists(Webstuhl::getResourceControllerBasePath());
+        $this->assertEquals($this->controllerPath->url(), Loom::getResourceControllerBasePath());
+        $this->assertDirectoryExists(Loom::getResourceControllerBasePath());
     }
 
     public function testResourceControllerGenerationWithoutGroup()
     {
-        $this->assertTrue(Webstuhl::createResourceController(self::RESOURCE_MODEL));
+        $this->assertTrue(Loom::createResourceController(self::RESOURCE_MODEL));
         $this->assertTrue($this->controllerPath->hasChild(self::RESOURCE_MODEL . 'Controller.php'));
     }
 
     public function testResourceControllerExists()
     {
-        $this->assertFalse(Webstuhl::createResourceController(self::RESOURCE_MODEL_EXISTING));
+        $this->assertFalse(Loom::createResourceController(self::RESOURCE_MODEL_EXISTING));
     }
 
     public function testResourceControllerGenerationWithGroup()
     {
-        $this->assertTrue(Webstuhl::createResourceController(self::RESOURCE_MODEL, self::RESOURCE_GROUP));
+        $this->assertTrue(Loom::createResourceController(self::RESOURCE_MODEL, self::RESOURCE_GROUP));
         $this->assertTrue($this->controllerPath->hasChild(self::RESOURCE_GROUP . DIRECTORY_SEPARATOR . self::RESOURCE_MODEL . 'Controller.php'));
     }
 }

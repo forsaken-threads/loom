@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class WebstuhlResourcesSeeder extends Seeder
+class LoomResourcesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -11,17 +11,17 @@ class WebstuhlResourcesSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('webstuhl_resources')->truncate();
+        DB::table('loom_resources')->truncate();
 
-        $namespace = Webstuhl::getResourceNamespace();
+        $namespace = Loom::getResourceNamespace();
         $resources = [
             "$namespace\\User",
-            "$namespace\\WebstuhlResource",
+            "$namespace\\LoomResource",
         ];
         foreach ($resources as $resource) {
-            $option = app("$namespace\\WebstuhlResource");
+            $option = app("$namespace\\LoomResource");
             $option->name = $resource;
-            $option->url = Webstuhl::getResourceUrl(class_basename($resource));
+            $option->url = Loom::getResourceUrl(class_basename($resource));
             $option->save();
         }
     }

@@ -10,10 +10,9 @@ trait Sortable
     protected $defaultSort;
 
     /**
-     * @param array $inputSorts
      * @return array
      */
-    abstract public function getSortableProperties(array $inputSorts);
+    abstract public function getSortableProperties();
 
     public function applySorts($givenSorts, Builder $query)
     {
@@ -27,7 +26,7 @@ trait Sortable
             }
             $givenSorts = $this->defaultSort;
         }
-        $orderedSorts = $this->getValidSorts($givenSorts);
+        $orderedSorts = $this->getValidSorts($this->getSortableProperties(), $givenSorts);
         foreach ($orderedSorts as $order => $orderedSort) {
             foreach ($orderedSort as $property => $sort) {
                 $result = $this->applySort($sort, $property, $query);
@@ -44,33 +43,33 @@ trait Sortable
         return [$this->presentSorts($orderedSorts), $belongsToManySorts];
     }
 
-    public function validateSorts(array $sortRules, array $givenSorts)
+    public function getValidSorts(array $properties, array $givenSorts)
     {
         $returnSorts = [];
-        $properties = $this->getValidationRules('sort');
-        foreach ($inputSorts as $order => $sorts_given) {
+        foreach ($givenSorts as $order => $sortsGiven) {
             $sorts = [];
             $returnSorts[$order] = [];
             foreach ($properties as $property => $ruleset) {
-                if (isset($sorts_given[$property])) {
-                    $sort = in_array($sorts_given[$property], ['asc', 'desc']) ? $sorts_given[$property] : 'asc';
+                if (isset($sortsGiven[$property])) {
+                    $sort = in_array($sortsGiven[$property], ['asc', 'desc']) ? $sortsGiven[$property] : 'asc';
                     $sorts[$property] = $sort;
                 }
             }
-            foreach ($this->getActiveEagerLinks() as $eager_link) {
-                if (!empty($sorts_given[snake_case($eager_link)])) {
-                    $eager_model_name = get_class($this->$eager_link()->getRelated());
-                    $eager_model = new $eager_model_name;
-                    $sorts[$eager_link] = $eager_model->getSortsViaDefaultValidationRules([$sorts_given[snake_case($eager_link)]]);
-                }
-            }
+//            foreach ($this->getActiveEagerLinks() as $eager_link) {
+//                if (!empty($sortsGiven[snake_case($eager_link)])) {
+//                    $eager_model_name = get_class($this->$eager_link()->getRelated());
+//                    $eager_model = new $eager_model_name;
+//                    $sorts[$eager_link] = $eager_model->getSortsViaDefaultValidationRules([$sortsGiven[snake_case($eager_link)]]);
+//                }
+//            }
             foreach ($sorts as $property => $sort) {
-                if (in_array($property, $this->getActiveEagerLinks())) {
-                    $returnSorts[$order]['__auto_eager_link'][$property] = $sorts[$property];
-                    continue;
-                }
+//                if (in_array($property, $this->getActiveEagerLinks())) {
+//                    $returnSorts[$order]['__auto_eager_link'][$property] = $sorts[$property];
+//                    continue;
+//                }
                 $sort = in_array($sort, ['asc', 'desc']) ? $sort : 'asc';
-                $returnSorts[$order][$this->isPlaceHolderProperty($property) || in_array($property, $this->appends) ? $property : $this->property($property)] = $sort;
+//                $returnSorts[$order][$this->isPlaceHolderProperty($property) || in_array($property, $this->appends) ? $property : $this->property($property)] = $sort;
+                $returnSorts[$order][$property] = $sort;
             }
         }
         return $returnSorts;

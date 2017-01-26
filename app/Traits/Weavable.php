@@ -3,7 +3,6 @@
 namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -21,7 +20,7 @@ trait Weavable
      */
     public static function bootWeavable()
     {
-        // Webstuhl resources use UUIDs for primary keys
+        // Loom resources use UUIDs for primary keys
         static::creating(function ($model) {
             /** @var Model $model */
             $model->{$model->getKeyName()} = (string) Uuid::uuid4();

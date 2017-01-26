@@ -1,6 +1,6 @@
 <?php
 
-namespace ForsakenThreads\Webstuhl\Tests;
+namespace ForsakenThreads\Loom\Tests;
 
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Testing\TestCase as LaravelTestCase;

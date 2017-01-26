@@ -7,9 +7,8 @@ use ForsakenThreads\Loom\Tests\TestHelpers\TestableResource;
 use Illuminate\Database\Schema\Blueprint;
 use Schema;
 
-class SortableTest extends TestCase
+class FilterableCustomFilter extends TestCase
 {
-
     /** @var TestableResource */
     protected $resource;
 
@@ -32,11 +31,27 @@ class SortableTest extends TestCase
         $this->resource = new TestableResource();
     }
 
-    public function testExample()
+    public function testDefaultFilter()
     {
-//        $input = [
-//
-//        ]
-//        $result = $this->resource->getFilterValidationRules();
+        $presented = [
+            'rank' => trans('quality-control.filterable.presenting.between', [0, 100]),
+            'level' => trans('quality-control.filterable.presenting.between', [50, 100]),
+        ];
+
+        $query = [
+            'query' => 'select * from "testable_resources" where "rank" between ? and ? and "level" between ? and ?',
+            'bindings' => [
+                '0',
+                '100',
+                '50',
+                '100',
+            ],
+        ];
+        $q = $this->resource->newQuery();
+        $this->assertEquals($presented, $this->resource->applyFilters([], $q));
+        $q->get();
+        $log = DB::connection('testing')->getQueryLog();
+        $this->assertArraySubset($query, array_pop($log));
+
     }
 }

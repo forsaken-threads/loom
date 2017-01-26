@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Webstuhl\QualityControl;
+use App\Loom\QualityControl;
 
 trait QualityControllable
 {
@@ -55,19 +55,19 @@ trait QualityControllable
     }
 
     /**
-     * @param array $inputFilters
      * @return array
      */
-    public function getValidFilters(array $inputFilters)
+    public function getFilterValidationRules()
     {
-        $filterRules = $this->getValidationRulesForContext('filter');
-        return $this->validateFilters($filterRules, $inputFilters);
+        return $this->getValidationRulesForContext('filter');
     }
 
-    public function getSortableProperties(array $inputSorts)
+    /**
+     * @return array
+     */
+    public function getSortableProperties()
     {
-        $sortRules = $this->getValidationRulesForContext('sort');
-        return $this->validateSorts($sortRules, $inputSorts);
+        return array_keys($this->getValidationRulesForContext('sort'));
     }
     /**
      * @param $rule

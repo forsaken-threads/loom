@@ -3,18 +3,18 @@
 namespace App\Resources{{ $group }};
 
 use App\Traits\Weavable;
-use App\Webstuhl\QualityControl;
+use App\Loom\QualityControl;
 use Illuminate\Database\Eloquent\Model;
 
 class {{ $name }} extends Model
 {
     use Weavable;
 
-    // Webstuhl resources use UUIDs for their primary key
+    // Loom resources use UUIDs for their primary key
     public $incrementing = false;
 
     /**
-     * Get the contextual validation rules for the Webstuhl resource
+     * Get the contextual validation rules for the Loom resource
      * @return QualityControl
      */
     public function getQualityControl()

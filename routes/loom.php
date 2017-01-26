@@ -11,5 +11,5 @@
 */
 
 Route::resource('users', 'UserController');
-Route::resource('webstuhl_resources', 'WebstuhlResourceController');
+Route::resource('loom_resources', 'LoomResourceController');
 Route::resource('tests', 'TestController');

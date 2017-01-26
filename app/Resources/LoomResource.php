@@ -3,15 +3,15 @@
 namespace App\Resources;
 
 use App\Traits\Weavable;
-use App\Webstuhl\QualityControl;
+use App\Loom\QualityControl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 
-class WebstuhlResource extends Model
+class LoomResource extends Model
 {
     use Weavable;
 
-    // Webstuhl resources use UUIDs for their primary key
+    // Loom resources use UUIDs for their primary key
     public $incrementing = false;
 
     protected $guarded = ['id'];

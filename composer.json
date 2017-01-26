@@ -32,7 +32,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "ForsakenThreads\\Webstuhl\\Tests\\": "tests/"
+            "ForsakenThreads\\Loom\\Tests\\": "tests/"
         }
     },
     "scripts": {

@@ -2,7 +2,8 @@
 
 namespace App\Traits;
 
-use App\Webstuhl\Filter;
+use App\Contracts\DefaultFilterable;
+use App\Loom\Filter;
 use Illuminate\Database\Eloquent\Builder;
 
 trait Filterable
@@ -14,10 +15,9 @@ trait Filterable
     protected $defaultFilter;
 
     /**
-     * @param array $inputFilters
      * @return array
      */
-    abstract public function getValidFilters(array $inputFilters);
+    abstract public function getFilterValidationRules();
 
     /**
      * @param $givenFilters
@@ -32,16 +32,19 @@ trait Filterable
             $givenFilters = json_decode($givenFilters, true);
         }
         if (!$givenFilters || !is_array($givenFilters)) {
-            if (empty($this->defaultFilter) && !method_exists($this, 'setDefaultFilter')) {
+            if (empty($this->defaultFilter) && ! $this instanceof DefaultFilterable) {
                 return null;
             }
             if (!empty($this->defaultFilter)) {
                 $filters = $this->defaultFilter;
-            } elseif (method_exists($this, 'setDefaultFilter')) {
-                $filters = $this->setDefaultFilter();
+            } elseif ($this instanceof DefaultFilterable) {
+                $filters = $this->getDefaultFilters();
+                if (!is_array($filters)) {
+                    $filters = (array) $filters;
+                }
             }
         } else {
-            $filters = $this->getValidFilters($givenFilters);
+            $filters = $this->getValidFilters($this->getFilterValidationRules(), $givenFilters);
         }
         /** @var Filter[] $filters */
         foreach ($filters as $property => $filter) {
@@ -55,7 +58,7 @@ trait Filterable
      * @param array $givenFilters
      * @return array
      */
-    public function validateFilters(array $filterRules, array $givenFilters)
+    public function getValidFilters(array $filterRules, array $givenFilters)
     {
         $potentialFilters = [];
         $instructions = [];
@@ -135,19 +138,19 @@ trait Filterable
 
         $potentialFilter = ['instruction' => $instruction];
         switch ($instruction) {
-            case 'between':
+            case trans('quality-control.filterable.instructions.between'):
                 // pass-through
-            case 'notBetween':
+            case trans('quality-control.filterable.instructions.notBetween'):
                 if (count($givenFilter[$instruction]) != 2 || !is_string(current($givenFilter[$instruction])) || !is_string(next($givenFilter[$instruction]))) {
                     break;
                 }
                 $potentialFilter['filter'] = $givenFilter[$instruction];
                 break;
-            case 'exactly':
+            case trans('quality-control.filterable.instructions.exactly'):
                 // pass-through
-            case 'not':
+            case trans('quality-control.filterable.instructions.not'):
                 // pass-through
-            case 'notExactly':
+            case trans('quality-control.filterable.instructions.notExactly'):
                 $potentialFilter['filter'] = $givenFilter[$instruction];
                 break;
         }

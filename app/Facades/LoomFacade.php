@@ -2,10 +2,10 @@
 
 namespace App\Facades;
 
-use App\Webstuhl\Helper;
+use App\Loom\Helper;
 use Illuminate\Support\Facades\Facade as BaseFacade;
 
-class WebstuhlFacade extends BaseFacade
+class LoomFacade extends BaseFacade
 {
     /**
      * Get the registered name of the component.
