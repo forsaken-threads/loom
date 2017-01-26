@@ -41,6 +41,10 @@ class QualityControlTest extends TestCase
         'email' => ['email', 'nullable'],
     ];
 
+    protected $removeTest;
+
+    protected $removeMultiTest;
+
     protected $replaceMultiTest = [
         'name' => 'present',
         'email' => 'present',
@@ -78,6 +82,11 @@ class QualityControlTest extends TestCase
         $this->appendToFieldTest['role'] = Rule::in(['Admin', 'User', 'Guest']);
         $this->appendMultiTest['role'] = Rule::in(['Admin', 'User', 'Guest']);
         $this->appendMultiStringTest['role'] = [Rule::in(['Admin', 'User', 'Guest']), 'present', 'bail'];
+        $this->removeTest = $this->defaultRules;
+        unset($this->removeTest['role']);
+        $this->removeMultiTest = $this->defaultRules;
+        unset($this->removeMultiTest['email']);
+        unset($this->removeMultiTest['role']);
         $this->replaceMultiTest['role'] = Rule::in(['Admin', 'User', 'Guest']);
         $this->replaceTest = $this->defaultRules;
         $this->replaceTest['role'] = Rule::notIn(['bad juju']);
@@ -101,6 +110,10 @@ class QualityControlTest extends TestCase
                 ->appendAll(Rule::notIn(['bad juju']))
             ->forContext('append-to-field-test')
                 ->append('name', 'present')
+            ->forContext('remove-test')
+                ->remove('role')
+            ->forContext('remove-multi-test')
+                ->remove(['role', 'email'])
             ->forContext('replace-test')
                 ->replace('role', Rule::notIn(['bad juju']))
             ->forContext('append-multi-test')
@@ -159,6 +172,16 @@ class QualityControlTest extends TestCase
     public function testAppendMulti()
     {
         $this->assertEquals($this->appendMultiTest, $this->qc->getRules('append-multi-test'));
+    }
+
+    public function testRemove()
+    {
+        $this->assertEquals($this->removeTest, $this->qc->getRules('remove-test'));
+    }
+
+    public function testRemoveMulti()
+    {
+        $this->assertEquals($this->removeMultiTest, $this->qc->getRules('remove-multi-test'));
     }
 
     public function testReplaceMulti()

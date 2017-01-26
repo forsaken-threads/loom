@@ -97,6 +97,18 @@ class QualityControl
 
     /**
      * @param $fields
+     * @return $this
+     */
+    public function remove($fields)
+    {
+        if (!is_array($fields)) {
+            $fields = (array) $fields;
+        }
+        $this->contextualTransformations[$this->editingContext][] = ['remove' => $fields];
+        return $this;
+    }
+    /**
+     * @param $fields
      * @param $rule
      * @return $this
      */
@@ -229,6 +241,11 @@ class QualityControl
                     case 'appendAll':
                         foreach ($baseRules as $field => &$rules) {
                             $this->appendRule($rules, $parameters);
+                        }
+                        break;
+                    case 'remove':
+                        foreach ($parameters as $parameter) {
+                            unset($baseRules[$parameter]);
                         }
                         break;
                     case 'replace':
