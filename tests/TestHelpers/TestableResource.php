@@ -3,6 +3,7 @@
 namespace ForsakenThreads\Loom\Tests\TestHelpers;
 
 use App\Contracts\DefaultFilterable;
+use App\Loom\FilterCollection;
 use App\Traits\Weavable;
 use App\Loom\Filter;
 use App\Loom\QualityControl;
@@ -16,14 +17,14 @@ class TestableResource extends Model implements DefaultFilterable
     public $connection = 'testing';
 
     /**
-     * @return Filter[]
+     * @return FilterCollection
      */
     public function getDefaultFilters()
     {
-        return [
-            'rank' => new Filter(['0', '100'], 'rank', 'between'),
-            'level'=> new Filter(['50', '100'], 'level', 'between')
-        ];
+        $filters = new FilterCollection();
+        return $filters
+            ->addFilter('rank', new Filter(['0', '100'], 'rank', 'between'))
+            ->addFilter('level', new Filter(['50', '100'], 'level', 'between'));
     }
 
     /**

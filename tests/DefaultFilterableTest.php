@@ -2,12 +2,15 @@
 
 namespace ForsakenThreads\Loom\Tests;
 
+use App\Exceptions\LoomException;
 use DB;
 use ForsakenThreads\Loom\Tests\TestHelpers\TestableResource;
+use ForsakenThreads\Loom\Tests\TestHelpers\TestableResourceTwo;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Schema\Blueprint;
 use Schema;
 
-class FilterableCustomFilter extends TestCase
+class DefaultFilterableTest extends TestCase
 {
     /** @var TestableResource */
     protected $resource;
@@ -31,7 +34,7 @@ class FilterableCustomFilter extends TestCase
         $this->resource = new TestableResource();
     }
 
-    public function testDefaultFilter()
+    public function testValidDefaultFilter()
     {
         $presented = [
             'rank' => trans('quality-control.filterable.presenting.between', [0, 100]),
@@ -52,6 +55,16 @@ class FilterableCustomFilter extends TestCase
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
+    }
 
+    public function testInvalidDefaultFilter()
+    {
+        $resource = new TestableResourceTwo();
+        $q = app(Builder::class);
+        try {
+            $resource->applyFilters([], $q);
+        } catch (LoomException $e) {
+            $this->assertEquals(trans('quality-control.filterable.get-default-filters-error', ['class' => get_class($resource)]), $e->getMessage());
+        }
     }
 }

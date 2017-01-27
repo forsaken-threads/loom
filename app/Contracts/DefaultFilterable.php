@@ -2,12 +2,12 @@
 
 namespace App\Contracts;
 
-use App\Loom\Filter;
+use App\Loom\FilterCollection;
 
 interface DefaultFilterable
 {
     /**
-     * @return Filter[]
+     * @return FilterCollection
      */
     function getDefaultFilters();
 }

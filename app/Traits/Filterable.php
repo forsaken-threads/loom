@@ -3,16 +3,13 @@
 namespace App\Traits;
 
 use App\Contracts\DefaultFilterable;
+use App\Exceptions\LoomException;
 use App\Loom\Filter;
+use App\Loom\FilterCollection;
 use Illuminate\Database\Eloquent\Builder;
 
 trait Filterable
 {
-
-    /**
-     * @var array
-     */
-    protected $defaultFilter;
 
     /**
      * @return array
@@ -24,23 +21,20 @@ trait Filterable
      * @param Builder $query
      * @param bool $orTogether
      * @return array|null
+     * @throws LoomException
      */
     public function applyFilters($givenFilters, Builder $query, $orTogether = false)
     {
-        $filters = [];
         if (is_string($givenFilters)) {
             $givenFilters = json_decode($givenFilters, true);
         }
         if (!$givenFilters || !is_array($givenFilters)) {
-            if (empty($this->defaultFilter) && ! $this instanceof DefaultFilterable) {
+            if (! $this instanceof DefaultFilterable) {
                 return null;
-            }
-            if (!empty($this->defaultFilter)) {
-                $filters = $this->defaultFilter;
-            } elseif ($this instanceof DefaultFilterable) {
+            } else {
                 $filters = $this->getDefaultFilters();
-                if (!is_array($filters)) {
-                    $filters = (array) $filters;
+                if (!$filters instanceof FilterCollection) {
+                    throw new LoomException(trans('quality-control.filterable.get-default-filters-error', ['class' => __CLASS__]));
                 }
             }
         } else {
@@ -56,7 +50,7 @@ trait Filterable
     /**
      * @param array $filterRules
      * @param array $givenFilters
-     * @return array
+     * @return FilterCollection
      */
     public function getValidFilters(array $filterRules, array $givenFilters)
     {
@@ -97,25 +91,25 @@ trait Filterable
 //            }
 //        }
 //        $returnFilters = $returnFilters['__auto_eager_links'] = [];
-        $returnFilters = [];
+        $returnFilters = new FilterCollection();
         foreach ($validFilters as $property => $validFilter) {
 //            if (in_array($property, $this->getActiveEagerLinks())) {
 //                $returnFilters['__auto_eager_links'][$property] = $validFilters[$property];
 //                continue;
 //            }
-            $returnFilters[$property] = new Filter($validFilter, $property, isset($instructions[$property]) ? $instructions[$property] : null);
+            $returnFilters->addFilter($property, new Filter($validFilter, $property, isset($instructions[$property]) ? $instructions[$property] : null));
         }
         return $returnFilters;
     }
 
     /**
-     * @param array $filtersApplied
+     * @param FilterCollection|array $filtersApplied
      * @return array
      */
-    protected function presentFilters(array $filtersApplied)
+    protected function presentFilters(FilterCollection $filtersApplied)
     {
         $filters = [];
-        /** @var Filter[] $filtersApplied */
+        /** @var Filter $filter */
         foreach ($filtersApplied as $property => $filter) {
 //            if ($property == '__auto_eager_links') {
 //                foreach ($filter as $eager_model => $eager_filters) {

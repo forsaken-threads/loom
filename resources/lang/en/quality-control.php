@@ -2,6 +2,9 @@
 
 return [
     'filterable' => [
+        'get-default-filters-error' => 'Method getDefaultFilters for :class should return an instance of App\\Loom\\FilterCollection',
+        'expected-property' => 'Expected property name but received :property',
+        'expected-filter' => 'Expected instance of App\\Loom\\Filter but received :got.',
         'instructions' => [
             'between' => 'between',
             'notBetween' => 'notBetween',
