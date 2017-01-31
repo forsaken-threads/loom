@@ -28,6 +28,16 @@ class FilterCollection implements Iterator
     }
 
     /**
+     * @param FilterCollection $filterCollection
+     * @return $this
+     */
+    public function addCollection(FilterCollection $filterCollection)
+    {
+        $this->collection = array_merge($this->collection, $filterCollection->getCollection());
+        return $this;
+    }
+
+    /**
      * @param string $property
      * @param Filter $filter
      * @return $this
@@ -40,6 +50,14 @@ class FilterCollection implements Iterator
         }
         $this->collection[$property] = $filter;
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCollection()
+    {
+        return $this->collection;
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Loom\FilterScope;
 use App\Loom\QualityControl;
 
 trait QualityControllable
@@ -60,6 +61,15 @@ trait QualityControllable
     public function getFilterValidationRules()
     {
         return $this->getValidationRulesForContext('filter');
+    }
+
+    /**
+     * @param $scopeName
+     * @return FilterScope
+     */
+    public function getFilterScope($scopeName)
+    {
+        return $this->getQualityControl()->getFilterScope($scopeName);
     }
 
     /**

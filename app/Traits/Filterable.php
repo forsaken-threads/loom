@@ -6,6 +6,7 @@ use App\Contracts\DefaultFilterable;
 use App\Exceptions\LoomException;
 use App\Loom\Filter;
 use App\Loom\FilterCollection;
+use App\Loom\FilterScope;
 use Illuminate\Database\Eloquent\Builder;
 
 trait Filterable
@@ -17,10 +18,16 @@ trait Filterable
     abstract public function getFilterValidationRules();
 
     /**
+     * @param string $scopeName
+     * @return FilterScope
+     */
+    abstract public function getFilterScope($scopeName);
+
+    /**
      * @param $givenFilters
      * @param Builder $query
      * @param bool $orTogether
-     * @return array|null
+     * @return array
      * @throws LoomException
      */
     public function applyFilters($givenFilters, Builder $query, $orTogether = false)
@@ -28,9 +35,10 @@ trait Filterable
         if (is_string($givenFilters)) {
             $givenFilters = json_decode($givenFilters, true);
         }
+
         if (!$givenFilters || !is_array($givenFilters)) {
             if (! $this instanceof DefaultFilterable) {
-                return null;
+                return [];
             } else {
                 $filters = $this->getDefaultFilters();
                 if (!$filters instanceof FilterCollection) {
@@ -40,10 +48,12 @@ trait Filterable
         } else {
             $filters = $this->getValidFilters($this->getFilterValidationRules(), $givenFilters);
         }
+
         /** @var Filter[] $filters */
         foreach ($filters as $property => $filter) {
             $filter->applyFilter($query, $orTogether);
         }
+
         return $this->presentFilters($filters);
     }
 
@@ -54,9 +64,11 @@ trait Filterable
      */
     public function getValidFilters(array $filterRules, array $givenFilters)
     {
+        $returnFilters = new FilterCollection();
         $potentialFilters = [];
         $instructions = [];
         $rules = [];
+
         foreach ($filterRules as $property => $ruleSet) {
             if (key_exists($property, $givenFilters) && !nonZeroEmpty($givenFilters[$property]) && !shallow($givenFilters[$property])) {
                 $potentialFilters[$property] = $givenFilters[$property];
@@ -80,8 +92,13 @@ trait Filterable
                         }
                     }
                 }
+            } elseif ($property == trans('quality-control.filterable.__scope')) {
+                if ($validFilterScopes = $this->getValidFilterScopes($filterRules[$property])) {
+                    $returnFilters->addCollection($validFilterScopes);
+                }
             }
         }
+
         $validFilters = validator($potentialFilters, $rules)->valid();
 //        foreach ($this->getActiveEagerLinks() as $eager_link) {
 //            if (!empty($inputFilters[snake_case($eager_link)])) {
@@ -91,7 +108,6 @@ trait Filterable
 //            }
 //        }
 //        $returnFilters = $returnFilters['__auto_eager_links'] = [];
-        $returnFilters = new FilterCollection();
         foreach ($validFilters as $property => $validFilter) {
 //            if (in_array($property, $this->getActiveEagerLinks())) {
 //                $returnFilters['__auto_eager_links'][$property] = $validFilters[$property];
@@ -100,6 +116,20 @@ trait Filterable
             $returnFilters->addFilter($property, new Filter($validFilter, $property, isset($instructions[$property]) ? $instructions[$property] : null));
         }
         return $returnFilters;
+    }
+
+    /**
+     * @param array $givenScopes
+     * @return FilterCollection
+     */
+    protected function getValidFilterScopes(array $givenScopes)
+    {
+        $returnFilterScopes = new FilterCollection();
+        foreach ($givenScopes as $scope => $arguments) {
+            if ($filterScope = $this->getFilterScope($scope)) {
+            }
+        }
+        return $returnFilterScopes;
     }
 
     /**
@@ -140,6 +170,8 @@ trait Filterable
                 }
                 $potentialFilter['filter'] = $givenFilter[$instruction];
                 break;
+            case trans('quality-control.filterable.instructions.applyScope'):
+                // pass-through
             case trans('quality-control.filterable.instructions.exactly'):
                 // pass-through
             case trans('quality-control.filterable.instructions.not'):

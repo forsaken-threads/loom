@@ -2,10 +2,12 @@
 
 return [
     'filterable' => [
+        '__scope' => '__scope',
         'get-default-filters-error' => 'Method getDefaultFilters for :class should return an instance of App\\Loom\\FilterCollection',
         'expected-property' => 'Expected property name but received :property',
         'expected-filter' => 'Expected instance of App\\Loom\\Filter but received :got.',
         'instructions' => [
+            'applyScope' => 'applyScope',
             'between' => 'between',
             'notBetween' => 'notBetween',
             'exactly' => 'exactly',

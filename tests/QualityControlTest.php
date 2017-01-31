@@ -4,6 +4,7 @@ use App\Loom\QualityControl;
 use ForsakenThreads\Loom\Tests\TestCase;
 use Illuminate\Validation\Rule;
 
+// TODO: test custom messaging
 class QualityControlTest extends TestCase
 {
     protected $appendAllTest = [

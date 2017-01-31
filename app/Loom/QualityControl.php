@@ -6,24 +6,36 @@ class QualityControl
 {
 
     /**
+     * These are the base validation rules for the resource.
      * @var array
      */
     protected $defaultRules;
 
     /**
+     * These transforms are applied to the defaultRules to get the rules
+     * for a specific context.
      * @var array
      */
     protected $contextualTransformations = ['__default' => []];
 
     /**
+     * This is a flag for the currently edited context
      * @var string
      */
     protected $editingContext;
 
     /**
+     * These messages are to customize the validator responses.
      * @var array
      */
     protected $messages = [];
+
+    /**
+     * Scopes that can be applied to resource indexes are managed through
+     * Quality Control.
+     * @var FilterScope[]
+     */
+    protected $filterScopes = [];
 
     /**
      * QualityControl constructor.
@@ -34,6 +46,7 @@ class QualityControl
         $this->defaultRules = $defaultRules;
         $this->editingContext = '__default';
     }
+
 
     /**
      * @param $fields
@@ -72,15 +85,30 @@ class QualityControl
         if (!isset($this->contextualTransformations[$context])) {
             $this->contextualTransformations[$context] = [];
         }
+        if (!isset($this->messages[$context])) {
+            $this->messages[$context] = [];
+        }
         return $this;
     }
 
     /**
-     * @return mixed
+     * @param $scopeName
+     * @return bool|FilterScope
+     */
+    public function getFilterScope($scopeName)
+    {
+        if (isset($this->filterScopes[$scopeName])) {
+            return $this->filterScopes[$scopeName];
+        }
+        return false;
+    }
+
+    /**
+     * @return array
      */
     public function getMessages()
     {
-        return $this->messages;
+        return $this->messages[$this->editingContext];
     }
 
     /**
@@ -164,9 +192,24 @@ class QualityControl
      */
     public function withMessages($messages)
     {
-        $this->messages = $messages;
+        $this->messages[$this->editingContext] = $messages;
         return $this;
     }
+
+    /**
+     * @param string|FilterScope $scope
+     * @return $this
+     */
+    public function withScope($scope)
+    {
+        if (is_string($scope)) {
+            $this->filterScopes[$scope] = new FilterScope($scope);
+        } elseif ($scope instanceof FilterScope) {
+            $this->filterScopes[$scope] = $scope;
+        }
+        return $this;
+    }
+
     /**
      * @param $rules
      * @param $newRule

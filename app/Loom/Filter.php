@@ -2,10 +2,9 @@
 
 namespace App\Loom;
 
-use App\Contracts\Filter as FilterContract;
 use Illuminate\Database\Eloquent\Builder;
 
-class Filter implements FilterContract
+class Filter
 {
     protected $comparator;
 
@@ -17,7 +16,7 @@ class Filter implements FilterContract
      * Filter constructor.
      * @param $validFilter
      * @param $property
-     * @param $instruction
+     * @param null $instruction
      */
     public function __construct($validFilter, $property, $instruction = null)
     {
@@ -64,6 +63,10 @@ class Filter implements FilterContract
 //            return;
 //        }
         switch ($this->comparator) {
+            case 'apply scope':
+                $method = camel_case($or . 'Where');
+                $query->$method($this->filter);
+                break;
             case 'equals':
                 $method = camel_case($or . (is_array($this->filter) ? 'WhereIn' : 'Where'));
                 $query->$method($this->property, $this->filter);
@@ -141,6 +144,8 @@ class Filter implements FilterContract
     public function presentFilter()
     {
         switch ($this->comparator) {
+            case 'apply scope':
+                return 'scope applied';
             case 'between':
                 // pass-through
             case 'not between':
@@ -178,11 +183,10 @@ class Filter implements FilterContract
      */
     protected function determineComparator($property, $instruction)
     {
-        if (method_exists($this, 'filter' . studly_case($property))) {
-            return call_user_func_array([$this, 'filter' . studly_case($property)], [$this->filter]);
-        }
-
         if ($instruction != 'between' && $instruction != 'notBetween') {
+            if ($instruction == 'applyScope') {
+                return 'apply scope';
+            }
             if ($instruction == 'exactly') {
                 return 'equals';
             }

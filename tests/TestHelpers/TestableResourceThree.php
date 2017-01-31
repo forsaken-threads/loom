@@ -2,30 +2,16 @@
 
 namespace ForsakenThreads\Loom\Tests\TestHelpers;
 
-use App\Contracts\DefaultFilterable;
-use App\Loom\FilterCollection;
 use App\Traits\Weavable;
-use App\Loom\Filter;
 use App\Loom\QualityControl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
 
-class TestableResource extends Model implements DefaultFilterable
+class TestableResourceThree extends Model
 {
     use Weavable;
 
     public $connection = 'testing';
-
-    /**
-     * @return FilterCollection
-     */
-    public function getDefaultFilters()
-    {
-        $filters = new FilterCollection();
-        return $filters
-            ->addFilter('rank', new Filter(['0', '100'], 'rank', 'between'))
-            ->addFilter('level', new Filter(['50', '100'], 'level', 'between'));
-    }
 
     /**
      * @return QualityControl
@@ -47,13 +33,6 @@ class TestableResource extends Model implements DefaultFilterable
             ->forContext('update')
                 ->append(['nickname', 'email'], Rule::unique('testable_resources')->whereNot('id', $this->id))
             ->forContext('filter')
-                ->replace(['name', 'email'], 'string')
-            ->withScope('awesomePeople')
-            ->withScope();
-    }
-
-    public function scopeAwesomePeople($query)
-    {
-        return $query->where('level', '>', 75);
+                ->replace(['name', 'email'], 'string');
     }
 }

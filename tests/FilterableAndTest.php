@@ -614,4 +614,35 @@ class FilterableAndTest extends TestCase
         $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
+
+//    public function testApplyScopeFilters()
+//    {
+//        $input = [
+//            'level' => ['applyScope' => 'awesomePeople'],
+//        ];
+//
+//        $output = new FilterCollection([
+//            'level' => new Filter('awesomePeople', 'level', trans('quality-control.filterable.instructions.applyScope')),
+//        ]);
+//
+//        $presented = [
+//            'level' => 'scope applied',
+//        ];
+//
+//        $query = [
+//            'query' => 'select * from "testable_resources" where "level" >= ?',
+//            'bindings' => [
+//                '50',
+//            ],
+//        ];
+//
+//        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+//        $this->assertEquals($output, $result);
+//
+//        $q = $this->resource->newQuery();
+//        $this->assertEquals($presented, $this->resource->applyFilters($input, $q));
+//        $q->get();
+//        $log = DB::connection('testing')->getQueryLog();
+//        $this->assertArraySubset($query, array_pop($log));
+//    }
 }
