@@ -4,28 +4,37 @@ namespace App\Loom;
 
 use App\Contracts\Filter as FilterContract;
 use App\Exceptions\LoomException;
-use Iterator;
+use Illuminate\Database\Eloquent\Builder;
 
-class FilterCollection implements Iterator
+class FilterCollection
 {
+
+    /**
+     * @var array
+     */
     protected $collection = [];
 
     /**
+     * @var bool
+     */
+    protected $orTogether;
+
+    /**
      * FilterCollection constructor.
+     *
      * @param array $filters
+     * @param bool $orTogether
      * @throws LoomException
      */
-    public function __construct(array $filters = [])
+    public function __construct(array $filters = [], $orTogether = false)
     {
         foreach ($filters as $property => $filter) {
             if (!ctype_alpha($property[0])) {
                 throw new LoomException(trans('quality-control.filterable.expected-property', ['property' => $property]));
             }
-            if (! $filter instanceof FilterContract) {
-                throw new LoomException(trans('quality-control.filterable.expected-filter', ['got' => print_r($filter, true)]));
-            }
             $this->addFilter($property, $filter);
         }
+        $this->orTogether = $orTogether;
     }
 
     /**
@@ -40,17 +49,43 @@ class FilterCollection implements Iterator
 
     /**
      * @param string $property
-     * @param FilterContract $filter
+     * @param FilterContract|FilterCollection $filter
      * @return $this
      * @throws LoomException
      */
-    public function addFilter($property, FilterContract $filter)
+    public function addFilter($property, $filter)
     {
         if (!ctype_alpha($property[0])) {
             throw new LoomException(trans('quality-control.filterable.expected-property', ['property' => $property]));
         }
+        if (! $filter instanceof FilterContract && ! $filter instanceof FilterCollection) {
+            throw new LoomException(trans('quality-control.filterable.expected-filter-or-collection', ['got' => print_r($filter, true)]));
+        }
         $this->collection[$property] = $filter;
         return $this;
+    }
+
+    public function applyConnectedResourceFilters($resource, FilterCollection $filters, Builder $query)
+    {
+        $method = camel_case(($this->orTogether ? 'Or' : '') . 'WhereHas');
+        $query->$method($resource, function ($q) use ($filters) {
+            $filters->applyFilters($q);
+        });
+    }
+
+    /**
+     * @param Builder $query
+     */
+    public function applyFilters(Builder $query)
+    {
+        /** @var FilterContract|FilterCollection $filter */
+        foreach ($this->collection as $property => $filter) {
+            if ($filter instanceof FilterCollection) {
+                $this->applyConnectedResourceFilters($property, $filter, $query);
+                continue;
+            }
+            $filter->applyFilter($query, $this->orTogether);
+        }
     }
 
     /**
@@ -62,64 +97,29 @@ class FilterCollection implements Iterator
     }
 
     /**
-     * Return the current element
-     * @link http://php.net/manual/en/iterator.current.php
-     * @return mixed Can return any type.
-     * @since 5.0.0
+     * @return array
      */
-    public function current()
+    public function presentFilters()
     {
-        return current($this->collection);
+        $filters = [];
+        /** @var FilterContract|FilterCollection $filter */
+        foreach ($this->collection as $property => $filter) {
+            if ($filter instanceof FilterCollection) {
+                $filters[$property] = $filter->presentFilters();
+                continue;
+            }
+            $filters[$property] = $filter->presentFilter();
+        }
+        return $filters;
     }
 
     /**
-     * Return the key of the current element
-     * @link http://php.net/manual/en/iterator.key.php
-     * @return mixed scalar on success, or null on failure.
-     * @since 5.0.0
+     * @param $property
+     * @return $this
      */
-    public function key()
-    {
-        return key($this->collection);
-    }
-
-    /**
-     * Move forward to next element
-     * @link http://php.net/manual/en/iterator.next.php
-     * @return void Any returned value is ignored.
-     * @since 5.0.0
-     */
-    public function next()
-    {
-        next($this->collection);
-    }
-
     public function remove($property)
     {
         unset($this->collection[$property]);
         return $this;
-    }
-
-    /**
-     * Rewind the Iterator to the first element
-     * @link http://php.net/manual/en/iterator.rewind.php
-     * @return void Any returned value is ignored.
-     * @since 5.0.0
-     */
-    public function rewind()
-    {
-        reset($this->collection);
-    }
-
-    /**
-     * Checks if current position is valid
-     * @link http://php.net/manual/en/iterator.valid.php
-     * @return boolean The return value will be casted to boolean and then evaluated.
-     * Returns true on success or false on failure.
-     * @since 5.0.0
-     */
-    public function valid()
-    {
-        return current($this->collection) instanceof FilterContract;
     }
 }

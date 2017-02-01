@@ -36,13 +36,13 @@ class FilterableOrTest extends TestCase
 
     public function testSimpleFilters()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => 'filter-name',
             'nickname' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
             'level' => ['10', '-5', '0'],
             'email' => 'filter-email',
-        ];
+        ]];
 
         $output = new FilterCollection([
             'name' => new Filter('filter-name', 'name'),
@@ -50,7 +50,7 @@ class FilterableOrTest extends TestCase
             'rank' => new Filter('0', 'rank'),
             'level' => new Filter(['10', '-5', '0'], 'level'),
             'email' => new Filter('filter-email', 'email')
-        ]);
+        ], true);
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -86,12 +86,12 @@ class FilterableOrTest extends TestCase
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
-        $this->assertEquals($presented, $this->resource->applyFilters($input, $q, true));
+        $this->assertEquals($presented, $this->resource->applyFilters($input, $q));
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
 
-        $input['nickname'][0] = 'f';
+        $input[trans('quality-control.filterable.__or')]['nickname'][0] = 'f';
         $output->remove('nickname');
 
         $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
@@ -100,7 +100,7 @@ class FilterableOrTest extends TestCase
 
     public function testSimpleFiltersAndSimpleScope()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => 'filter-name',
             'nickname' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
@@ -109,7 +109,7 @@ class FilterableOrTest extends TestCase
             trans('quality-control.filterable.__scope') => [
                 'awesomePeople'
             ]
-        ];
+        ]];
 
         $output = new FilterCollection([
             'name' => new Filter('filter-name', 'name'),
@@ -118,7 +118,7 @@ class FilterableOrTest extends TestCase
             'level' => new Filter(['10', '-5', '0'], 'level'),
             'email' => new Filter('filter-email', 'email'),
             trans('quality-control.filterable.applied-scope') . ':awesomePeople' => new FilterScope('awesomePeople'),
-        ]);
+        ], true);
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -156,7 +156,7 @@ class FilterableOrTest extends TestCase
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
-        $this->assertEquals($presented, $this->resource->applyFilters($input, $q, true));
+        $this->assertEquals($presented, $this->resource->applyFilters($input, $q));
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
@@ -164,7 +164,7 @@ class FilterableOrTest extends TestCase
 
     public function testSimpleFiltersAndAlternativeSimpleScope()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => 'filter-name',
             'nickname' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
@@ -173,7 +173,7 @@ class FilterableOrTest extends TestCase
             trans('quality-control.filterable.__scope') => [
                 'awesomePeople' => []
             ]
-        ];
+        ]];
 
         $output = new FilterCollection([
             'name' => new Filter('filter-name', 'name'),
@@ -182,7 +182,7 @@ class FilterableOrTest extends TestCase
             'level' => new Filter(['10', '-5', '0'], 'level'),
             'email' => new Filter('filter-email', 'email'),
             trans('quality-control.filterable.applied-scope') . ':awesomePeople' => new FilterScope('awesomePeople'),
-        ]);
+        ], true);
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -228,7 +228,7 @@ class FilterableOrTest extends TestCase
 
     public function testSimpleFiltersAndComplexScope()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => 'filter-name',
             'nickname' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
@@ -237,7 +237,7 @@ class FilterableOrTest extends TestCase
             trans('quality-control.filterable.__scope') => [
                 'awesomeishPeople' => ['level' => 40]
             ]
-        ];
+        ]];
 
         $filterScope = new FilterScope('awesomeishPeople');
         $filterScope->withArguments('level')
@@ -252,7 +252,7 @@ class FilterableOrTest extends TestCase
             'level' => new Filter(['10', '-5', '0'], 'level'),
             'email' => new Filter('filter-email', 'email'),
             trans('quality-control.filterable.applied-scope') . ':awesomeishPeople' => $filterScope,
-        ]);
+        ], true);
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',

@@ -29,6 +29,19 @@ class TestableResource extends Model implements DefaultFilterable
     }
 
     /**
+     * @return array
+     */
+    public function getConnectableResources()
+    {
+        return [
+            'TestableConnectedFirstLevelBelongsToResource',
+            'TestableConnectedFirstLevelBelongsToManyResource',
+            'TestableConnectedFirstLevelHasManyResource',
+            'TestableConnectedFirstLevelHasOneResource'
+        ];
+    }
+
+    /**
      * @return QualityControl
      */
     public function getQualityControl()
@@ -70,5 +83,25 @@ class TestableResource extends Model implements DefaultFilterable
     public function scopeAwesomeishRankedPeople($query, $level, $rank, $role = 'Admin')
     {
         return $query->where('level', '>', $level)->where('rank', '>', $rank)->where('role', $role);
+    }
+
+    public function TestableConnectedFirstLevelBelongsToResource()
+    {
+        return $this->belongsTo(TestableConnectedFirstLevelBelongsToResource::class);
+    }
+
+    public function TestableConnectedFirstLevelBelongsToManyResource()
+    {
+        return $this->belongsToMany(TestableConnectedFirstLevelBelongsToManyResource::class);
+    }
+
+    public function TestableConnectedFirstLevelHasManyResource()
+    {
+        return $this->hasMany(TestableConnectedFirstLevelHasManyResource::class);
+    }
+
+    public function TestableConnectedFirstLevelHasOneResource()
+    {
+        return $this->hasOne(TestableConnectedFirstLevelHasOneResource::class);
     }
 }

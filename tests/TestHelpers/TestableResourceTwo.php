@@ -10,6 +10,17 @@ class TestableResourceTwo implements DefaultFilterable
 {
     use Weavable;
 
+    /**
+     * @return array
+     */
+    public function getConnectableResources()
+    {
+        return [];
+    }
+
+    /**
+     * @return bool
+     */
     public function getDefaultFilters()
     {
         return false;

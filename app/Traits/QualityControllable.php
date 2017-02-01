@@ -11,6 +11,8 @@ trait QualityControllable
         Sortable;
 
     /**
+     * Get the Quality Control object for this class
+     *
      * @return QualityControl
      */
     abstract public function getQualityControl();

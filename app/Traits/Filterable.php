@@ -3,15 +3,16 @@
 namespace App\Traits;
 
 use App\Contracts\DefaultFilterable;
-use App\Contracts\Filter as FilterContract;
 use App\Exceptions\LoomException;
 use App\Loom\Filter;
 use App\Loom\FilterCollection;
 use App\Loom\FilterScope;
+use App\Resources\LoomResource;
 use Illuminate\Database\Eloquent\Builder;
 
 trait Filterable
 {
+    use LoomConnectable;
 
     /**
      * @return array
@@ -27,11 +28,10 @@ trait Filterable
     /**
      * @param $givenFilters
      * @param Builder $query
-     * @param bool $orTogether
      * @return array
      * @throws LoomException
      */
-    public function applyFilters($givenFilters, Builder $query, $orTogether = false)
+    public function applyFilters($givenFilters, Builder $query)
     {
         if (is_string($givenFilters)) {
             $givenFilters = json_decode($givenFilters, true);
@@ -43,22 +43,16 @@ trait Filterable
             } else {
                 $filters = $this->getDefaultFilters();
                 if (!$filters instanceof FilterCollection) {
-                    throw new LoomException(trans('quality-control.filterable.get-default-filters-error', ['class' => __CLASS__]));
+                    throw new LoomException(trans('quality-control.filterable.get-default-filters-error', ['class' => __CLASS__, 'got' => get_class($filters)]));
                 }
             }
         } else {
             $filters = $this->getValidFilters($this->getFilterValidationRules(), $givenFilters);
         }
 
-        /**
-         * @var FilterCollection $filters
-         * @var FilterContract $filter
-         */
-        foreach ($filters as $property => $filter) {
-            $filter->applyFilter($query, $orTogether);
-        }
+        $filters->applyFilters($query);
 
-        return $this->presentFilters($filters);
+        return $filters->presentFilters();
     }
 
     /**
@@ -68,11 +62,14 @@ trait Filterable
      */
     public function getValidFilters(array $filterRules, array $givenFilters)
     {
-        $returnFilters = new FilterCollection();
+        $orTogether = key($givenFilters) . '' == trans('quality-control.filterable.__or');
+        $givenFilters = !$orTogether  ? $givenFilters : $givenFilters[trans('quality-control.filterable.__or')];
+        $returnFilters = new FilterCollection([], $orTogether);
         $potentialFilters = [];
         $instructions = [];
         $rules = [];
 
+        // Validate and include any resource level filters
         foreach ($filterRules as $property => $ruleSet) {
             if (key_exists($property, $givenFilters) && !nonZeroEmpty($givenFilters[$property]) && !shallow($givenFilters[$property])) {
                 $potentialFilters[$property] = $givenFilters[$property];
@@ -99,23 +96,29 @@ trait Filterable
             }
         }
         $validFilters = validator($potentialFilters, $rules)->valid();
-//        foreach ($this->getActiveEagerLinks() as $eager_link) {
-//            if (!empty($inputFilters[snake_case($eager_link)])) {
-//                $eager_model_name = get_class($this->$eager_link()->getRelated());
-//                $eager_model = new $eager_model_name;
-//                $validFilters[$eager_link] = $eager_model->getFiltersViaDefaultValidationRules($inputFilters[snake_case($eager_link)]);
-//            }
-//        }
-//        $returnFilters = $returnFilters['__auto_eager_links'] = [];
         foreach ($validFilters as $property => $validFilter) {
-//            if (in_array($property, $this->getActiveEagerLinks())) {
-//                $returnFilters['__auto_eager_links'][$property] = $validFilters[$property];
-//                continue;
-//            }
             $returnFilters->addFilter($property, new Filter($validFilter, $property, isset($instructions[$property]) ? $instructions[$property] : null));
         }
 
-        // Validate and include any valid scopes
+        // Validate and include any connectable resource filters
+        foreach ($this->getConnectableResources() as $resource) {
+            if (!empty($givenFilters[$resource])) {
+                $resourceName = get_class($this->$resource()->getRelated());
+                /**
+                 * This comment is simply for IDE autocompletion OCD. :-)
+                 * The real resource will be something different.
+                 *
+                 * @var LoomResource $resourceInstance
+                 */
+                $resourceInstance = new $resourceName;
+                $resourceFilters = key($givenFilters[$resource]) != trans('quality-control.filterable.__or') ? $givenFilters[$resource] : $givenFilters[$resource][trans('quality-control.filterable.__or')];
+                if ($valid = $resourceInstance->getValidFilters($resourceInstance->getFilterValidationRules(), $resourceFilters)) {
+                    $returnFilters->addFilter($resource, $valid);
+                }
+            }
+        }
+
+        // Validate and include any valid resource scopes
         if (isset($givenFilters[trans('quality-control.filterable.__scope')])) {
             if ($validFilterScopes = $this->getValidFilterScopes($givenFilters[trans('quality-control.filterable.__scope')])) {
                 $returnFilters->addCollection($validFilterScopes);
@@ -131,7 +134,9 @@ trait Filterable
      */
     protected function getValidFilterScopes(array $givenScopes)
     {
-        $returnFilterScopes = new FilterCollection();
+        $orTogether = key($givenScopes) . '' == trans('quality-control.filterable.__or');
+        $givenScopes = !$orTogether ? $givenScopes : $givenScopes[trans('quality-control.filterable.__or')];
+        $returnFilterScopes = new FilterCollection([], $orTogether);
         foreach ($givenScopes as $scope => $arguments) {
             if (ctype_digit($scope . '')) {
                 $scope = $arguments;
@@ -144,26 +149,6 @@ trait Filterable
             }
         }
         return $returnFilterScopes;
-    }
-
-    /**
-     * @param FilterCollection $filtersApplied
-     * @return array
-     */
-    protected function presentFilters(FilterCollection $filtersApplied)
-    {
-        $filters = [];
-        /** @var Filter $filter */
-        foreach ($filtersApplied as $property => $filter) {
-//            if ($property == '__auto_eager_links') {
-//                foreach ($filter as $eager_model => $eager_filters) {
-//                    $filters[$eager_model] = $this->presentFilters($eager_filters);
-//                }
-//                continue;
-//            }
-            $filters[$property] = $filter->presentFilter();
-        }
-        return $filters;
     }
 
     /**

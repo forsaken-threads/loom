@@ -34,6 +34,19 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the Loom resources that this resource is connected to and
+     * that will be publicly exposed by Loom
+     *
+     * @return array
+     */
+    public function getConnectableResources()
+    {
+        return [];
+    }
+
+    /**
+     * Get the Quality Control object for the Loom resource
+     *
      * @return QualityControl
      */
     public function getQualityControl()

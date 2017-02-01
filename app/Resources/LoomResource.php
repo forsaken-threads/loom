@@ -5,33 +5,39 @@ namespace App\Resources;
 use App\Traits\Weavable;
 use App\Loom\QualityControl;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Validation\Rule;
 
 class LoomResource extends Model
 {
     use Weavable;
 
-    // Loom resources use UUIDs for their primary key
+    /**
+     * Loom resources use UUIDs for their primary key
+     *
+     * @var bool
+     */
     public $incrementing = false;
 
     protected $guarded = ['id'];
 
     /**
+     * Get the Loom resources that this resource is connected to and
+     * that will be publicly exposed by Loom
+     *
+     * @return array
+     */
+    public function getConnectableResources()
+    {
+        return [];
+    }
+
+    /**
+     * Get the Quality Control object for the Loom resource
+     *
      * @return QualityControl
      */
     public function getQualityControl()
     {
-        $qc = new QualityControl([
-            'name' => 'string|max:100|',
-            'nickname' => ['regex:/^[A-Za-z0-9]{3,}$/'],
-            'email' => 'email',
-            'role' => Rule::in(['Admin', 'User', 'Guest'])
+        return new QualityControl([
         ]);
-        return $qc
-            ->forContext('create')
-                ->requireAll()
-                ->append(['nickname', 'email'], Rule::unique('users'))
-            ->forContext('update')
-                ->append(['nickname', 'email'], Rule::unique('users')->whereNot('id', $this->id));
     }
 }
