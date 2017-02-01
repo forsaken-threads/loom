@@ -205,7 +205,7 @@ class QualityControl
         if (is_string($scope)) {
             $this->filterScopes[$scope] = new FilterScope($scope);
         } elseif ($scope instanceof FilterScope) {
-            $this->filterScopes[$scope] = $scope;
+            $this->filterScopes[$scope->getName()] = $scope;
         }
         return $this;
     }

@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Contracts\DefaultFilterable;
+use App\Contracts\Filter as FilterContract;
 use App\Exceptions\LoomException;
 use App\Loom\Filter;
 use App\Loom\FilterCollection;
@@ -49,7 +50,10 @@ trait Filterable
             $filters = $this->getValidFilters($this->getFilterValidationRules(), $givenFilters);
         }
 
-        /** @var Filter[] $filters */
+        /**
+         * @var FilterCollection $filters
+         * @var FilterContract $filter
+         */
         foreach ($filters as $property => $filter) {
             $filter->applyFilter($query, $orTogether);
         }
@@ -92,13 +96,8 @@ trait Filterable
                         }
                     }
                 }
-            } elseif ($property == trans('quality-control.filterable.__scope')) {
-                if ($validFilterScopes = $this->getValidFilterScopes($filterRules[$property])) {
-                    $returnFilters->addCollection($validFilterScopes);
-                }
             }
         }
-
         $validFilters = validator($potentialFilters, $rules)->valid();
 //        foreach ($this->getActiveEagerLinks() as $eager_link) {
 //            if (!empty($inputFilters[snake_case($eager_link)])) {
@@ -115,6 +114,14 @@ trait Filterable
 //            }
             $returnFilters->addFilter($property, new Filter($validFilter, $property, isset($instructions[$property]) ? $instructions[$property] : null));
         }
+
+        // Validate and include any valid scopes
+        if (isset($givenFilters[trans('quality-control.filterable.__scope')])) {
+            if ($validFilterScopes = $this->getValidFilterScopes($givenFilters[trans('quality-control.filterable.__scope')])) {
+                $returnFilters->addCollection($validFilterScopes);
+            }
+        }
+
         return $returnFilters;
     }
 
@@ -126,14 +133,21 @@ trait Filterable
     {
         $returnFilterScopes = new FilterCollection();
         foreach ($givenScopes as $scope => $arguments) {
+            if (ctype_digit($scope . '')) {
+                $scope = $arguments;
+                $arguments = [];
+            }
             if ($filterScope = $this->getFilterScope($scope)) {
+                if ($filterScope->validateAndSetInput($arguments)) {
+                    $returnFilterScopes->addFilter(trans('quality-control.filterable.applied-scope'). ':' . $scope, $filterScope);
+                }
             }
         }
         return $returnFilterScopes;
     }
 
     /**
-     * @param FilterCollection|array $filtersApplied
+     * @param FilterCollection $filtersApplied
      * @return array
      */
     protected function presentFilters(FilterCollection $filtersApplied)

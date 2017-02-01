@@ -2,9 +2,10 @@
 
 namespace App\Loom;
 
+use App\Contracts\Filter as FilterContract;
 use Illuminate\Database\Eloquent\Builder;
 
-class Filter
+class Filter implements FilterContract
 {
     protected $comparator;
 
@@ -29,7 +30,7 @@ class Filter
      * @param Builder $query
      * @param bool $orTogether
      */
-    public function applyFilter($query, $orTogether)
+    public function applyFilter(Builder $query, $orTogether)
     {
         $or = $orTogether ? 'Or' : '';
 //        if ($property == '__auto_eager_links') {
@@ -63,10 +64,6 @@ class Filter
 //            return;
 //        }
         switch ($this->comparator) {
-            case 'apply scope':
-                $method = camel_case($or . 'Where');
-                $query->$method($this->filter);
-                break;
             case 'equals':
                 $method = camel_case($or . (is_array($this->filter) ? 'WhereIn' : 'Where'));
                 $query->$method($this->property, $this->filter);
@@ -141,11 +138,12 @@ class Filter
         }
     }
 
+    /**
+     * @return string
+     */
     public function presentFilter()
     {
         switch ($this->comparator) {
-            case 'apply scope':
-                return 'scope applied';
             case 'between':
                 // pass-through
             case 'not between':
@@ -184,9 +182,6 @@ class Filter
     protected function determineComparator($property, $instruction)
     {
         if ($instruction != 'between' && $instruction != 'notBetween') {
-            if ($instruction == 'applyScope') {
-                return 'apply scope';
-            }
             if ($instruction == 'exactly') {
                 return 'equals';
             }

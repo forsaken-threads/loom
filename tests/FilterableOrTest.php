@@ -4,6 +4,7 @@ namespace ForsakenThreads\Loom\Tests;
 
 use App\Loom\Filter;
 use App\Loom\FilterCollection;
+use App\Loom\FilterScope;
 use DB;
 use ForsakenThreads\Loom\Tests\TestHelpers\TestableResource;
 use Illuminate\Database\Schema\Blueprint;
@@ -95,6 +96,335 @@ class FilterableOrTest extends TestCase
 
         $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
         $this->assertEquals($output, $result);
+    }
+
+    public function testSimpleFiltersAndSimpleScope()
+    {
+        $input = [
+            'name' => 'filter-name',
+            'nickname' => ['filter1-nickname', 'filter2-nickname'],
+            'rank' => '0',
+            'level' => ['10', '-5', '0'],
+            'email' => 'filter-email',
+            trans('quality-control.filterable.__scope') => [
+                'awesomePeople'
+            ]
+        ];
+
+        $output = new FilterCollection([
+            'name' => new Filter('filter-name', 'name'),
+            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname'),
+            'rank' => new Filter('0', 'rank'),
+            'level' => new Filter(['10', '-5', '0'], 'level'),
+            'email' => new Filter('filter-email', 'email'),
+            trans('quality-control.filterable.applied-scope') . ':awesomePeople' => new FilterScope('awesomePeople'),
+        ]);
+
+        $presented = [
+            'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
+            'nickname' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . 'filter1-nickname, filter2-nickname',
+            'rank' => trans('quality-control.filterable.presenting.like') . '0',
+            'level' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . '10, -5, 0',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
+            trans('quality-control.filterable.applied-scope') . ':awesomePeople' => 'awesomePeople',
+        ];
+
+        $query = [
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or ("level" > ?)',
+            'bindings' => [
+                'name',
+                '%filter-name%',
+                'nickname',
+                '%filter1-nickname%',
+                'nickname',
+                '%filter2-nickname%',
+                'email',
+                '%filter-email%',
+                'rank',
+                '%0%',
+                'level',
+                '%10%',
+                'level',
+                '%-5%',
+                'level',
+                '%0%',
+                75,
+            ],
+        ];
+
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $this->assertEquals($output, $result);
+
+        $q = $this->resource->newQuery();
+        $this->assertEquals($presented, $this->resource->applyFilters($input, $q, true));
+        $q->get();
+        $log = DB::connection('testing')->getQueryLog();
+        $this->assertArraySubset($query, array_pop($log));
+    }
+
+    public function testSimpleFiltersAndAlternativeSimpleScope()
+    {
+        $input = [
+            'name' => 'filter-name',
+            'nickname' => ['filter1-nickname', 'filter2-nickname'],
+            'rank' => '0',
+            'level' => ['10', '-5', '0'],
+            'email' => 'filter-email',
+            trans('quality-control.filterable.__scope') => [
+                'awesomePeople' => []
+            ]
+        ];
+
+        $output = new FilterCollection([
+            'name' => new Filter('filter-name', 'name'),
+            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname'),
+            'rank' => new Filter('0', 'rank'),
+            'level' => new Filter(['10', '-5', '0'], 'level'),
+            'email' => new Filter('filter-email', 'email'),
+            trans('quality-control.filterable.applied-scope') . ':awesomePeople' => new FilterScope('awesomePeople'),
+        ]);
+
+        $presented = [
+            'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
+            'nickname' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . 'filter1-nickname, filter2-nickname',
+            'rank' => trans('quality-control.filterable.presenting.like') . '0',
+            'level' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . '10, -5, 0',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
+            trans('quality-control.filterable.applied-scope') . ':awesomePeople' => 'awesomePeople',
+        ];
+
+        $query = [
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or ("level" > ?)',
+            'bindings' => [
+                'name',
+                '%filter-name%',
+                'nickname',
+                '%filter1-nickname%',
+                'nickname',
+                '%filter2-nickname%',
+                'email',
+                '%filter-email%',
+                'rank',
+                '%0%',
+                'level',
+                '%10%',
+                'level',
+                '%-5%',
+                'level',
+                '%0%',
+                75,
+            ],
+        ];
+
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $this->assertEquals($output, $result);
+
+        $q = $this->resource->newQuery();
+        $this->assertEquals($presented, $this->resource->applyFilters($input, $q, true));
+        $q->get();
+        $log = DB::connection('testing')->getQueryLog();
+        $this->assertArraySubset($query, array_pop($log));
+    }
+
+    public function testSimpleFiltersAndComplexScope()
+    {
+        $input = [
+            'name' => 'filter-name',
+            'nickname' => ['filter1-nickname', 'filter2-nickname'],
+            'rank' => '0',
+            'level' => ['10', '-5', '0'],
+            'email' => 'filter-email',
+            trans('quality-control.filterable.__scope') => [
+                'awesomeishPeople' => ['level' => 40]
+            ]
+        ];
+
+        $filterScope = new FilterScope('awesomeishPeople');
+        $filterScope->withArguments('level')
+            ->setArgumentDefault('level', 33)
+            ->setValidationRules(['level' => 'numeric|between:30,100'])
+            ->validateAndSetInput(['level' => 40]);
+
+        $output = new FilterCollection([
+            'name' => new Filter('filter-name', 'name'),
+            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname'),
+            'rank' => new Filter('0', 'rank'),
+            'level' => new Filter(['10', '-5', '0'], 'level'),
+            'email' => new Filter('filter-email', 'email'),
+            trans('quality-control.filterable.applied-scope') . ':awesomeishPeople' => $filterScope,
+        ]);
+
+        $presented = [
+            'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
+            'nickname' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . 'filter1-nickname, filter2-nickname',
+            'rank' => trans('quality-control.filterable.presenting.like') . '0',
+            'level' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . '10, -5, 0',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
+            trans('quality-control.filterable.applied-scope') . ':awesomeishPeople' => 'awesomeishPeople',
+        ];
+
+        $query = [
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or ("level" > ?)',
+            'bindings' => [
+                'name',
+                '%filter-name%',
+                'nickname',
+                '%filter1-nickname%',
+                'nickname',
+                '%filter2-nickname%',
+                'email',
+                '%filter-email%',
+                'rank',
+                '%0%',
+                'level',
+                '%10%',
+                'level',
+                '%-5%',
+                'level',
+                '%0%',
+                40,
+            ],
+        ];
+
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $this->assertEquals($output, $result);
+
+        $q = $this->resource->newQuery();
+        $this->assertEquals($presented, $this->resource->applyFilters($input, $q, true));
+        $q->get();
+        $log = DB::connection('testing')->getQueryLog();
+        $this->assertArraySubset($query, array_pop($log));
+    }
+
+    public function testSimpleFiltersAndInvalidScope()
+    {
+        $input = [
+            'name' => 'filter-name',
+            'nickname' => ['filter1-nickname', 'filter2-nickname'],
+            'rank' => '0',
+            'level' => ['10', '-5', '0'],
+            'email' => 'filter-email',
+            trans('quality-control.filterable.__scope') => [
+                'awesomeishPeople' => ['level' => 20]
+            ]
+        ];
+
+        $output = new FilterCollection([
+            'name' => new Filter('filter-name', 'name'),
+            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname'),
+            'rank' => new Filter('0', 'rank'),
+            'level' => new Filter(['10', '-5', '0'], 'level'),
+            'email' => new Filter('filter-email', 'email'),
+        ]);
+
+        $presented = [
+            'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
+            'nickname' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . 'filter1-nickname, filter2-nickname',
+            'rank' => trans('quality-control.filterable.presenting.like') . '0',
+            'level' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . '10, -5, 0',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
+        ];
+
+        $query = [
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?',
+            'bindings' => [
+                'name',
+                '%filter-name%',
+                'nickname',
+                '%filter1-nickname%',
+                'nickname',
+                '%filter2-nickname%',
+                'email',
+                '%filter-email%',
+                'rank',
+                '%0%',
+                'level',
+                '%10%',
+                'level',
+                '%-5%',
+                'level',
+                '%0%',
+            ],
+        ];
+
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $this->assertEquals($output, $result);
+
+        $q = $this->resource->newQuery();
+        $this->assertEquals($presented, $this->resource->applyFilters($input, $q, true));
+        $q->get();
+        $log = DB::connection('testing')->getQueryLog();
+        $this->assertArraySubset($query, array_pop($log));
+    }
+
+    public function testSimpleFiltersAndComplexScopeWithDefaultValue()
+    {
+        $input = [
+            'name' => 'filter-name',
+            'nickname' => ['filter1-nickname', 'filter2-nickname'],
+            'rank' => '0',
+            'level' => ['10', '-5', '0'],
+            'email' => 'filter-email',
+            trans('quality-control.filterable.__scope') => [
+                'awesomeishPeople'
+            ]
+        ];
+
+        $filterScope = new FilterScope('awesomeishPeople');
+        $filterScope->withArguments('level')
+            ->setArgumentDefault('level', 33)
+            ->setValidationRules(['level' => 'numeric|between:30,100'])
+            ->validateAndSetInput([]);
+
+        $output = new FilterCollection([
+            'name' => new Filter('filter-name', 'name'),
+            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname'),
+            'rank' => new Filter('0', 'rank'),
+            'level' => new Filter(['10', '-5', '0'], 'level'),
+            'email' => new Filter('filter-email', 'email'),
+            trans('quality-control.filterable.applied-scope') . ':awesomeishPeople' => $filterScope,
+        ]);
+
+        $presented = [
+            'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
+            'nickname' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . 'filter1-nickname, filter2-nickname',
+            'rank' => trans('quality-control.filterable.presenting.like') . '0',
+            'level' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . '10, -5, 0',
+            'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
+            trans('quality-control.filterable.applied-scope') . ':awesomeishPeople' => 'awesomeishPeople',
+        ];
+
+        $query = [
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or ("level" > ?)',
+            'bindings' => [
+                'name',
+                '%filter-name%',
+                'nickname',
+                '%filter1-nickname%',
+                'nickname',
+                '%filter2-nickname%',
+                'email',
+                '%filter-email%',
+                'rank',
+                '%0%',
+                'level',
+                '%10%',
+                'level',
+                '%-5%',
+                'level',
+                '%0%',
+                33,
+            ],
+        ];
+
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $this->assertEquals($output, $result);
+
+        $q = $this->resource->newQuery();
+        $this->assertEquals($presented, $this->resource->applyFilters($input, $q, true));
+        $q->get();
+        $log = DB::connection('testing')->getQueryLog();
+        $this->assertArraySubset($query, array_pop($log));
     }
 
     public function testExactlyFilters()

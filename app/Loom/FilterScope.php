@@ -2,13 +2,11 @@
 
 namespace App\Loom;
 
-class FilterScope
-{
-    /**
-     * @var string
-     */
-    protected $name;
+use App\Contracts\Filter as FilterContract;
+use Illuminate\Database\Eloquent\Builder;
 
+class FilterScope implements FilterContract
+{
     /**
      * @var array
      */
@@ -22,6 +20,26 @@ class FilterScope
     /**
      * @var array
      */
+    protected $input = [];
+
+    /**
+     * @var array
+     */
+    protected $inputValues = [];
+
+    /**
+     * @var string
+     */
+    protected $name;
+
+    /**
+     * @var string|callable
+     */
+    protected $presentation;
+
+    /**
+     * @var array
+     */
     protected $validationRules = [];
 
     /**
@@ -31,6 +49,42 @@ class FilterScope
     public function __construct($name)
     {
         $this->name = $name;
+        $this->presentation = $name;
+    }
+
+    /**
+     * @param Builder $query
+     * @param $orTogether
+     */
+    public function applyFilter(Builder $query, $orTogether)
+    {
+        if ($orTogether) {
+            $query->orWhere(function ($q) {
+                /** @var Builder $q */
+                $q->{$this->name}(...$this->inputValues);
+            });
+        } else {
+            $query->{$this->name}(...$this->inputValues);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return string
+     */
+    public function presentFilter()
+    {
+        if (is_callable($this->presentation)) {
+            return call_user_func($this->presentation, $this->input);
+        }
+        return $this->presentation;
     }
 
     /**
@@ -41,6 +95,16 @@ class FilterScope
     public function setArgumentDefault($argument, $default)
     {
         $this->defaultValues[$argument] = $default;
+        return $this;
+    }
+
+    /**
+     * @param string|callable $presentation
+     * @return $this
+     */
+    public function setPresentation($presentation)
+    {
+        $this->presentation = $presentation;
         return $this;
     }
 
@@ -58,10 +122,9 @@ class FilterScope
      * @param $givenInput
      * @return bool
      */
-    public function validateInput($givenInput)
+    public function validateAndSetInput($givenInput)
     {
         $testInput = [];
-        // TODO: throw validation exception
         foreach ($this->arguments as $argument) {
             if (key_exists($argument, $givenInput)) {
                 $testInput[$argument] = $givenInput[$argument];
@@ -69,8 +132,12 @@ class FilterScope
                 $testInput[$argument] = $this->defaultValues[$argument];
             }
         }
-        return validator($testInput, $this->validationRules)->passes();
-
+        if (validator($testInput, $this->validationRules)->passes()) {
+            $this->input = $testInput;
+            $this->inputValues = array_values($testInput);
+            return true;
+        }
+        return false;
     }
 
     /**
