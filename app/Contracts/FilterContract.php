@@ -4,13 +4,12 @@ namespace App\Contracts;
 
 use Illuminate\Database\Eloquent\Builder;
 
-interface Filter
+interface FilterContract
 {
     /**
      * @param Builder $query
-     * @param $orTogether
      */
-    public function applyFilter(Builder $query, $orTogether);
+    public function applyFilter(Builder $query);
 
     /**
      * @return string

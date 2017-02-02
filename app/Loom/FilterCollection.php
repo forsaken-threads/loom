@@ -2,7 +2,7 @@
 
 namespace App\Loom;
 
-use App\Contracts\Filter as FilterContract;
+use App\Contracts\FilterContract;
 use App\Exceptions\LoomException;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -91,7 +91,7 @@ class FilterCollection
                 $this->applyConnectedResourceFilters($property, $filter, $query);
                 continue;
             }
-            $filter->applyFilter($query, $this->orTogether);
+            $filter->applyFilter($query);
         }
     }
 
@@ -101,6 +101,14 @@ class FilterCollection
     public function getCollection()
     {
         return $this->collection;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return count($this->collection) == 0;
     }
 
     /**

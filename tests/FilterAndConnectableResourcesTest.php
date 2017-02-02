@@ -2,7 +2,7 @@
 
 namespace ForsakenThreads\Loom\Tests;
 
-use App\Loom\Filter;
+use App\Loom\FilterCriteria;
 use App\Loom\FilterCollection;
 use DB;
 use ForsakenThreads\Loom\Tests\TestHelpers\TestableResource;
@@ -91,11 +91,11 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
+            'name' => new FilterCriteria('filter-name', 'name'),
             'TestableConnectedFirstLevelHasOneResource' => new FilterCollection([
-                'address' => new Filter('filter-address', 'address'),
-                'city' => new Filter('filter-city', 'city'),
-                'state' => new Filter('MI', 'state'),
+                'address' => new FilterCriteria('filter-address', 'address'),
+                'city' => new FilterCriteria('filter-city', 'city'),
+                'state' => new FilterCriteria('MI', 'state'),
             ]),
         ]);
 
@@ -122,7 +122,7 @@ class FilterAndConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -149,16 +149,16 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
+            'name' => new FilterCriteria('filter-name', 'name'),
             'TestableConnectedFirstLevelHasOneResource' => new FilterCollection([
-                'address' => new Filter('filter-address', 'address'),
-                'city' => new Filter('filter-city', 'city'),
-                'state' => new Filter('MI', 'state'),
+                'address' => new FilterCriteria('filter-address', 'address'),
+                'city' => new FilterCriteria('filter-city', 'city'),
+                'state' => new FilterCriteria('MI', 'state'),
             ]),
             'TestableConnectedFirstLevelHasManyResource' => new FilterCollection([
-                'address' => new Filter('filter-address', 'address'),
-                'city' => new Filter('filter-city', 'city'),
-                'state' => new Filter('MI', 'state'),
+                'address' => new FilterCriteria('filter-address', 'address', true),
+                'city' => new FilterCriteria('filter-city', 'city', true),
+                'state' => new FilterCriteria('MI', 'state', true),
             ], true)
         ]);
 
@@ -196,7 +196,7 @@ class FilterAndConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -223,15 +223,15 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
+            'name' => new FilterCriteria('filter-name', 'name'),
             'TestableConnectedFirstLevelHasOneResource' => new FilterCollection([
-                'address' => new Filter('filter1-address', 'address'),
-                'city' => new Filter('filter1-city', 'city'),
-                'state' => new Filter('MI', 'state'),
+                'address' => new FilterCriteria('filter1-address', 'address'),
+                'city' => new FilterCriteria('filter1-city', 'city'),
+                'state' => new FilterCriteria('MI', 'state'),
                 'TestableConnectedSecondLevelResource' => new FilterCollection([
-                    'address' => new Filter('filter2-address', 'address'),
-                    'city' => new Filter('filter2-city', 'city'),
-                    'state' => new Filter('FL', 'state'),
+                    'address' => new FilterCriteria('filter2-address', 'address'),
+                    'city' => new FilterCriteria('filter2-city', 'city'),
+                    'state' => new FilterCriteria('FL', 'state'),
                 ]),
             ])
         ]);
@@ -270,7 +270,7 @@ class FilterAndConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -292,11 +292,11 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
+            'name' => new FilterCriteria('filter-name', 'name'),
             'TestableConnectedFirstLevelHasManyResource' => new FilterCollection([
-                'address' => new Filter('filter-address', 'address'),
-                'city' => new Filter('filter-city', 'city'),
-                'state' => new Filter('MI', 'state'),
+                'address' => new FilterCriteria('filter-address', 'address'),
+                'city' => new FilterCriteria('filter-city', 'city'),
+                'state' => new FilterCriteria('MI', 'state'),
             ])
         ]);
 
@@ -323,7 +323,7 @@ class FilterAndConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -345,11 +345,11 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
+            'name' => new FilterCriteria('filter-name', 'name'),
             'TestableConnectedFirstLevelBelongsToResource' => new FilterCollection([
-                'address' => new Filter('filter-address', 'address'),
-                'city' => new Filter('filter-city', 'city'),
-                'state' => new Filter('MI', 'state'),
+                'address' => new FilterCriteria('filter-address', 'address'),
+                'city' => new FilterCriteria('filter-city', 'city'),
+                'state' => new FilterCriteria('MI', 'state'),
             ])
         ]);
 
@@ -376,7 +376,7 @@ class FilterAndConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -398,11 +398,11 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
+            'name' => new FilterCriteria('filter-name', 'name'),
             'TestableConnectedFirstLevelBelongsToManyResource' => new FilterCollection([
-                'address' => new Filter('filter-address', 'address'),
-                'city' => new Filter('filter-city', 'city'),
-                'state' => new Filter('MI', 'state'),
+                'address' => new FilterCriteria('filter-address', 'address'),
+                'city' => new FilterCriteria('filter-city', 'city'),
+                'state' => new FilterCriteria('MI', 'state'),
             ])
         ]);
 
@@ -429,7 +429,7 @@ class FilterAndConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();

@@ -2,7 +2,7 @@
 
 namespace App\Loom;
 
-use App\Contracts\Filter as FilterContract;
+use App\Contracts\FilterContract;
 use Illuminate\Database\Eloquent\Builder;
 
 class FilterScope implements FilterContract
@@ -33,6 +33,11 @@ class FilterScope implements FilterContract
     protected $name;
 
     /**
+     * @var bool
+     */
+    protected $orTogether;
+
+    /**
      * @var string|callable
      */
     protected $presentation;
@@ -44,21 +49,23 @@ class FilterScope implements FilterContract
 
     /**
      * FilterScope constructor.
+     *
      * @param $name
+     * @param bool $orTogether
      */
-    public function __construct($name)
+    public function __construct($name, $orTogether = false)
     {
         $this->name = $name;
         $this->presentation = $name;
+        $this->orTogether = $orTogether;
     }
 
     /**
      * @param Builder $query
-     * @param $orTogether
      */
-    public function applyFilter(Builder $query, $orTogether)
+    public function applyFilter(Builder $query)
     {
-        if ($orTogether) {
+        if ($this->orTogether) {
             $query->orWhere(function ($q) {
                 /** @var Builder $q */
                 $q->{$this->name}(...$this->inputValues);
@@ -95,6 +102,16 @@ class FilterScope implements FilterContract
     public function setArgumentDefault($argument, $default)
     {
         $this->defaultValues[$argument] = $default;
+        return $this;
+    }
+
+    /**
+     * @param $orTogether
+     * @return $this
+     */
+    public function setOrTogether($orTogether)
+    {
+        $this->orTogether = (bool) $orTogether;
         return $this;
     }
 

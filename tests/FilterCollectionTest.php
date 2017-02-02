@@ -3,7 +3,7 @@
 namespace ForsakenThreads\Loom\Tests;
 
 use App\Exceptions\LoomException;
-use App\Loom\Filter;
+use App\Loom\FilterCriteria;
 use App\Loom\FilterCollection;
 
 class FilterCollectionTest extends TestCase
@@ -11,18 +11,18 @@ class FilterCollectionTest extends TestCase
     public function testValidConstructors()
     {
         $collection = new FilterCollection([
-            'property' => new Filter('filter-name', 'name'),
+            'property' => new FilterCriteria('filter-name', 'name'),
         ]);
         foreach ($collection as $property => $filter) {
             $this->assertEquals('property', $property);
-            $this->assertEquals(new Filter('filter-name', 'name'), $filter);
+            $this->assertEquals(new FilterCriteria('filter-name', 'name'), $filter);
         }
     }
 
     public function testInvalidConstructors()
     {
         try {
-            $collection = new FilterCollection([new Filter('filter-name', 'name')]);
+            $collection = new FilterCollection([new FilterCriteria('filter-name', 'name')]);
         } catch (LoomException $e) {
             $this->assertEquals(trans('quality-control.filterable.expected-property', ['property' => 0]), $e->getMessage());
         }
@@ -36,10 +36,10 @@ class FilterCollectionTest extends TestCase
     public function testValidAddFilter()
     {
         $collection = new FilterCollection();
-        $collection->addFilter('property', new Filter('filter-name', 'name'));
+        $collection->addFilter('property', new FilterCriteria('filter-name', 'name'));
         foreach ($collection as $property => $filter) {
             $this->assertEquals('property', $property);
-            $this->assertEquals(new Filter('filter-name', 'name'), $filter);
+            $this->assertEquals(new FilterCriteria('filter-name', 'name'), $filter);
         }
     }
 
@@ -47,7 +47,7 @@ class FilterCollectionTest extends TestCase
     {
         $collection = new FilterCollection();
         try {
-            $collection->addFilter('0', new Filter('filter-name', 'name'));
+            $collection->addFilter('0', new FilterCriteria('filter-name', 'name'));
         } catch (LoomException $e) {
             $this->assertEquals(trans('quality-control.filterable.expected-property', ['property' => 0]), $e->getMessage());
         }

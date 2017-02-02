@@ -2,13 +2,12 @@
 
 namespace App\Traits;
 
-use App\Loom\FilterScope;
+use App\Loom\FilterContractScope;
 use App\Loom\QualityControl;
 
 trait QualityControllable
 {
-    use Filterable,
-        Sortable;
+    use Filterable;
 
     /**
      * Get the Quality Control object for this class
@@ -60,14 +59,14 @@ trait QualityControllable
     /**
      * @return array
      */
-    public function getFilterValidationRules()
+    public function getFilterCriteriaValidationRules()
     {
         return $this->getValidationRulesForContext('filter');
     }
 
     /**
      * @param $scopeName
-     * @return FilterScope
+     * @return FilterContractScope
      */
     public function getFilterScope($scopeName)
     {

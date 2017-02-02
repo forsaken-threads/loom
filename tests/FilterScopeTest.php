@@ -43,7 +43,7 @@ class FilterScopeTest extends TestCase
 
         $q = $this->resource->newQuery();
         $filterScope = new FilterScope('awesomePeople');
-        $filterScope->applyFilter($q, false);
+        $filterScope->applyFilter($q);
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
@@ -72,7 +72,7 @@ class FilterScopeTest extends TestCase
 
         $this->assertTrue($filterScope->validateAndSetInput($input));
 
-        $filterScope->applyFilter($q, false);
+        $filterScope->applyFilter($q);
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
@@ -114,7 +114,7 @@ class FilterScopeTest extends TestCase
 
         $this->assertTrue($filterScope->validateAndSetInput($input));
 
-        $filterScope->applyFilter($q, false);
+        $filterScope->applyFilter($q);
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
@@ -147,7 +147,7 @@ class FilterScopeTest extends TestCase
 
         $this->assertTrue($filterScope->validateAndSetInput($input));
 
-        $filterScope->applyFilter($q, false);
+        $filterScope->applyFilter($q);
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
@@ -181,7 +181,7 @@ class FilterScopeTest extends TestCase
 
         $this->assertTrue($filterScope->validateAndSetInput($input));
 
-        $filterScope->applyFilter($q, false);
+        $filterScope->applyFilter($q);
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));

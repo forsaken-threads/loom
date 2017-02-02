@@ -2,7 +2,7 @@
 
 namespace ForsakenThreads\Loom\Tests;
 
-use App\Loom\Filter;
+use App\Loom\FilterCriteria;
 use App\Loom\FilterCollection;
 use App\Loom\FilterScope;
 use DB;
@@ -45,11 +45,11 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
-            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname'),
-            'rank' => new Filter('0', 'rank'),
-            'level' => new Filter(['10', '-5', '0'], 'level'),
-            'email' => new Filter('filter-email', 'email')
+            'name' => new FilterCriteria('filter-name', 'name', true),
+            'nickname' => new FilterCriteria(['filter1-nickname', 'filter2-nickname'], 'nickname', true),
+            'rank' => new FilterCriteria('0', 'rank', true),
+            'level' => new FilterCriteria(['10', '-5', '0'], 'level', true),
+            'email' => new FilterCriteria('filter-email', 'email', true)
         ], true);
 
         $presented = [
@@ -82,7 +82,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -94,7 +94,7 @@ class FilterableOrTest extends TestCase
         $input[trans('quality-control.filterable.__or')]['nickname'][0] = 'f';
         $output->remove('nickname');
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
@@ -112,12 +112,12 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
-            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname'),
-            'rank' => new Filter('0', 'rank'),
-            'level' => new Filter(['10', '-5', '0'], 'level'),
-            'email' => new Filter('filter-email', 'email'),
-            trans('quality-control.filterable.applied-scope') . ':awesomePeople' => new FilterScope('awesomePeople'),
+            'name' => new FilterCriteria('filter-name', 'name', true),
+            'nickname' => new FilterCriteria(['filter1-nickname', 'filter2-nickname'], 'nickname', true),
+            'rank' => new FilterCriteria('0', 'rank', true),
+            'level' => new FilterCriteria(['10', '-5', '0'], 'level', true),
+            'email' => new FilterCriteria('filter-email', 'email', true),
+            trans('quality-control.filterable.applied-scope') . ':awesomePeople' => new FilterScope('awesomePeople', true),
         ], true);
 
         $presented = [
@@ -152,7 +152,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -176,12 +176,12 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
-            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname'),
-            'rank' => new Filter('0', 'rank'),
-            'level' => new Filter(['10', '-5', '0'], 'level'),
-            'email' => new Filter('filter-email', 'email'),
-            trans('quality-control.filterable.applied-scope') . ':awesomePeople' => new FilterScope('awesomePeople'),
+            'name' => new FilterCriteria('filter-name', 'name', true),
+            'nickname' => new FilterCriteria(['filter1-nickname', 'filter2-nickname'], 'nickname', true),
+            'rank' => new FilterCriteria('0', 'rank', true),
+            'level' => new FilterCriteria(['10', '-5', '0'], 'level', true),
+            'email' => new FilterCriteria('filter-email', 'email', true),
+            trans('quality-control.filterable.applied-scope') . ':awesomePeople' => new FilterScope('awesomePeople', true),
         ], true);
 
         $presented = [
@@ -216,7 +216,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -239,18 +239,18 @@ class FilterableOrTest extends TestCase
             ]
         ]];
 
-        $filterScope = new FilterScope('awesomeishPeople');
+        $filterScope = new FilterScope('awesomeishPeople', true);
         $filterScope->withArguments('level')
             ->setArgumentDefault('level', 33)
             ->setValidationRules(['level' => 'numeric|between:30,100'])
             ->validateAndSetInput(['level' => 40]);
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
-            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname'),
-            'rank' => new Filter('0', 'rank'),
-            'level' => new Filter(['10', '-5', '0'], 'level'),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria('filter-name', 'name', true),
+            'nickname' => new FilterCriteria(['filter1-nickname', 'filter2-nickname'], 'nickname', true),
+            'rank' => new FilterCriteria('0', 'rank', true),
+            'level' => new FilterCriteria(['10', '-5', '0'], 'level', true),
+            'email' => new FilterCriteria('filter-email', 'email', true),
             trans('quality-control.filterable.applied-scope') . ':awesomeishPeople' => $filterScope,
         ], true);
 
@@ -286,7 +286,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -310,11 +310,11 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
-            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname'),
-            'rank' => new Filter('0', 'rank'),
-            'level' => new Filter(['10', '-5', '0'], 'level'),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria('filter-name', 'name', true),
+            'nickname' => new FilterCriteria(['filter1-nickname', 'filter2-nickname'], 'nickname', true),
+            'rank' => new FilterCriteria('0', 'rank', true),
+            'level' => new FilterCriteria(['10', '-5', '0'], 'level', true),
+            'email' => new FilterCriteria('filter-email', 'email', true),
         ], true);
 
         $presented = [
@@ -347,7 +347,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -370,18 +370,18 @@ class FilterableOrTest extends TestCase
             ],
         ]];
 
-        $filterScope = new FilterScope('awesomeishPeople');
+        $filterScope = new FilterScope('awesomeishPeople', true);
         $filterScope->withArguments('level')
             ->setArgumentDefault('level', 33)
             ->setValidationRules(['level' => 'numeric|between:30,100'])
             ->validateAndSetInput([]);
 
         $output = new FilterCollection([
-            'name' => new Filter('filter-name', 'name'),
-            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname'),
-            'rank' => new Filter('0', 'rank'),
-            'level' => new Filter(['10', '-5', '0'], 'level'),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria('filter-name', 'name', true),
+            'nickname' => new FilterCriteria(['filter1-nickname', 'filter2-nickname'], 'nickname', true),
+            'rank' => new FilterCriteria('0', 'rank', true),
+            'level' => new FilterCriteria(['10', '-5', '0'], 'level', true),
+            'email' => new FilterCriteria('filter-email', 'email', true),
             trans('quality-control.filterable.applied-scope') . ':awesomeishPeople' => $filterScope,
         ], true);
 
@@ -417,7 +417,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -438,11 +438,11 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', trans('quality-control.filterable.instructions.exactly')),
-            'nickname' => new Filter('filter-nickname', 'nickname', trans('quality-control.filterable.instructions.exactly')),
-            'rank' => new Filter('0', 'rank', trans('quality-control.filterable.instructions.exactly')),
-            'level' => new Filter(['10', '-5', '-0'], 'level', trans('quality-control.filterable.instructions.exactly')),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria(['filter1-name', 'filter2-name'], 'name', true, trans('quality-control.filterable.instructions.exactly')),
+            'nickname' => new FilterCriteria('filter-nickname', 'nickname', true, trans('quality-control.filterable.instructions.exactly')),
+            'rank' => new FilterCriteria('0', 'rank', true, trans('quality-control.filterable.instructions.exactly')),
+            'level' => new FilterCriteria(['10', '-5', '-0'], 'level', true, trans('quality-control.filterable.instructions.exactly')),
+            'email' => new FilterCriteria('filter-email', 'email', true),
         ], true);
 
         $presented = [
@@ -468,7 +468,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -480,7 +480,7 @@ class FilterableOrTest extends TestCase
         $input[trans('quality-control.filterable.__or')]['nickname'][trans('quality-control.filterable.instructions.exactly')] = '1';
         $output->remove('nickname');
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
@@ -495,11 +495,11 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', trans('quality-control.filterable.instructions.notExactly')),
-            'nickname' => new Filter('filter-nickname', 'nickname', trans('quality-control.filterable.instructions.notExactly')),
-            'rank' => new Filter('0', 'rank', trans('quality-control.filterable.instructions.notExactly')),
-            'level' => new Filter(['10', '-5', '-0'], 'level', trans('quality-control.filterable.instructions.notExactly')),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria(['filter1-name', 'filter2-name'], 'name', true, trans('quality-control.filterable.instructions.notExactly')),
+            'nickname' => new FilterCriteria('filter-nickname', 'nickname', true, trans('quality-control.filterable.instructions.notExactly')),
+            'rank' => new FilterCriteria('0', 'rank', true, trans('quality-control.filterable.instructions.notExactly')),
+            'level' => new FilterCriteria(['10', '-5', '-0'], 'level', true, trans('quality-control.filterable.instructions.notExactly')),
+            'email' => new FilterCriteria('filter-email', 'email', true),
         ], true);
 
         $presented = [
@@ -510,7 +510,7 @@ class FilterableOrTest extends TestCase
             'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $query = [
@@ -537,7 +537,7 @@ class FilterableOrTest extends TestCase
         $input[trans('quality-control.filterable.__or')]['nickname'][trans('quality-control.filterable.instructions.notExactly')] = '1';
         $output->remove('nickname');
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
@@ -552,11 +552,11 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', trans('quality-control.filterable.instructions.not')),
-            'nickname' => new Filter('filter-nickname', 'nickname', trans('quality-control.filterable.instructions.not')),
-            'rank' => new Filter('0', 'rank', trans('quality-control.filterable.instructions.not')),
-            'level' => new Filter(['10', '-5', '0'], 'level', trans('quality-control.filterable.instructions.not')),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria(['filter1-name', 'filter2-name'], 'name', true, trans('quality-control.filterable.instructions.not')),
+            'nickname' => new FilterCriteria('filter-nickname', 'nickname', true, trans('quality-control.filterable.instructions.not')),
+            'rank' => new FilterCriteria('0', 'rank', true, trans('quality-control.filterable.instructions.not')),
+            'level' => new FilterCriteria(['10', '-5', '0'], 'level', true, trans('quality-control.filterable.instructions.not')),
+            'email' => new FilterCriteria('filter-email', 'email', true),
         ], true);
 
         $presented = [
@@ -589,7 +589,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -601,7 +601,7 @@ class FilterableOrTest extends TestCase
         $input[trans('quality-control.filterable.__or')]['nickname'][trans('quality-control.filterable.instructions.not')] = '1';
         $output->remove('nickname');
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
@@ -616,11 +616,11 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', trans('quality-control.filterable.instructions.between')),
-            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname', trans('quality-control.filterable.instructions.between')),
-            'rank' => new Filter(['0', '50'], 'rank', trans('quality-control.filterable.instructions.between')),
-            'level' => new Filter(['-50', '0'], 'level', trans('quality-control.filterable.instructions.between')),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria(['filter1-name', 'filter2-name'], 'name', true, trans('quality-control.filterable.instructions.between')),
+            'nickname' => new FilterCriteria(['filter1-nickname', 'filter2-nickname'], 'nickname', true, trans('quality-control.filterable.instructions.between')),
+            'rank' => new FilterCriteria(['0', '50'], 'rank', true, trans('quality-control.filterable.instructions.between')),
+            'level' => new FilterCriteria(['-50', '0'], 'level', true, trans('quality-control.filterable.instructions.between')),
+            'email' => new FilterCriteria('filter-email', 'email', true),
         ], true);
 
         $presented = [
@@ -647,7 +647,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -661,7 +661,7 @@ class FilterableOrTest extends TestCase
         $output->remove('name');
         $output->remove('nickname');
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
@@ -676,11 +676,11 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter(['filter1-name', 'filter2-name'], 'name', trans('quality-control.filterable.instructions.notBetween')),
-            'nickname' => new Filter(['filter1-nickname', 'filter2-nickname'], 'nickname', trans('quality-control.filterable.instructions.notBetween')),
-            'rank' => new Filter(['0', '50'], 'rank', trans('quality-control.filterable.instructions.notBetween')),
-            'level' => new Filter(['-50', '0'], 'level', trans('quality-control.filterable.instructions.notBetween')),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria(['filter1-name', 'filter2-name'], 'name', true, trans('quality-control.filterable.instructions.notBetween')),
+            'nickname' => new FilterCriteria(['filter1-nickname', 'filter2-nickname'], 'nickname', true, trans('quality-control.filterable.instructions.notBetween')),
+            'rank' => new FilterCriteria(['0', '50'], 'rank', true, trans('quality-control.filterable.instructions.notBetween')),
+            'level' => new FilterCriteria(['-50', '0'], 'level', true, trans('quality-control.filterable.instructions.notBetween')),
+            'email' => new FilterCriteria('filter-email', 'email', true),
         ], true);
 
         $presented = [
@@ -703,7 +703,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -717,7 +717,7 @@ class FilterableOrTest extends TestCase
         $output->remove('name');
         $output->remove('nickname');
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
@@ -732,11 +732,11 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter(['filter1-name', ''], 'name', trans('quality-control.filterable.instructions.between')),
-            'nickname' => new Filter(['filter1-nickname', ''], 'nickname', trans('quality-control.filterable.instructions.between')),
-            'rank' => new Filter(['0', ''], 'rank', trans('quality-control.filterable.instructions.between')),
-            'level' => new Filter(['-50', ''], 'level', trans('quality-control.filterable.instructions.between')),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria(['filter1-name', ''], 'name', true, trans('quality-control.filterable.instructions.between')),
+            'nickname' => new FilterCriteria(['filter1-nickname', ''], 'nickname', true, trans('quality-control.filterable.instructions.between')),
+            'rank' => new FilterCriteria(['0', ''], 'rank', true, trans('quality-control.filterable.instructions.between')),
+            'level' => new FilterCriteria(['-50', ''], 'level', true, trans('quality-control.filterable.instructions.between')),
+            'email' => new FilterCriteria('filter-email', 'email', true),
         ], true);
 
         $presented = [
@@ -759,7 +759,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -773,7 +773,7 @@ class FilterableOrTest extends TestCase
         $output->remove('name');
         $output->remove('nickname');
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
@@ -788,11 +788,11 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter(['filter1-name', ''], 'name', trans('quality-control.filterable.instructions.notBetween')),
-            'nickname' => new Filter(['filter1-nickname', ''], 'nickname', trans('quality-control.filterable.instructions.notBetween')),
-            'rank' => new Filter(['0', ''], 'rank', trans('quality-control.filterable.instructions.notBetween')),
-            'level' => new Filter(['-50', ''], 'level', trans('quality-control.filterable.instructions.notBetween')),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria(['filter1-name', ''], 'name', true, trans('quality-control.filterable.instructions.notBetween')),
+            'nickname' => new FilterCriteria(['filter1-nickname', ''], 'nickname', true, trans('quality-control.filterable.instructions.notBetween')),
+            'rank' => new FilterCriteria(['0', ''], 'rank', true, trans('quality-control.filterable.instructions.notBetween')),
+            'level' => new FilterCriteria(['-50', ''], 'level', true, trans('quality-control.filterable.instructions.notBetween')),
+            'email' => new FilterCriteria('filter-email', 'email', true),
         ], true);
 
         $presented = [
@@ -815,7 +815,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -829,7 +829,7 @@ class FilterableOrTest extends TestCase
         $output->remove('name');
         $output->remove('nickname');
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
@@ -844,11 +844,11 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter(['', 'filter1-name'], 'name', trans('quality-control.filterable.instructions.between')),
-            'nickname' => new Filter(['', 'filter1-nickname'], 'nickname', trans('quality-control.filterable.instructions.between')),
-            'rank' => new Filter(['', '0'], 'rank', trans('quality-control.filterable.instructions.between')),
-            'level' => new Filter(['', '50'], 'level', trans('quality-control.filterable.instructions.between')),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria(['', 'filter1-name'], 'name', true, trans('quality-control.filterable.instructions.between')),
+            'nickname' => new FilterCriteria(['', 'filter1-nickname'], 'nickname', true, trans('quality-control.filterable.instructions.between')),
+            'rank' => new FilterCriteria(['', '0'], 'rank', true, trans('quality-control.filterable.instructions.between')),
+            'level' => new FilterCriteria(['', '50'], 'level', true, trans('quality-control.filterable.instructions.between')),
+            'email' => new FilterCriteria('filter-email', 'email', true),
         ], true);
 
         $presented = [
@@ -871,7 +871,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -885,7 +885,7 @@ class FilterableOrTest extends TestCase
         $output->remove('name');
         $output->remove('nickname');
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 
@@ -900,11 +900,11 @@ class FilterableOrTest extends TestCase
         ]];
 
         $output = new FilterCollection([
-            'name' => new Filter(['', 'filter1-name'], 'name', trans('quality-control.filterable.instructions.notBetween')),
-            'nickname' => new Filter(['', 'filter1-nickname'], 'nickname', trans('quality-control.filterable.instructions.notBetween')),
-            'rank' => new Filter(['', '0'], 'rank', trans('quality-control.filterable.instructions.notBetween')),
-            'level' => new Filter(['', '50'], 'level', trans('quality-control.filterable.instructions.notBetween')),
-            'email' => new Filter('filter-email', 'email'),
+            'name' => new FilterCriteria(['', 'filter1-name'], 'name', true, trans('quality-control.filterable.instructions.notBetween')),
+            'nickname' => new FilterCriteria(['', 'filter1-nickname'], 'nickname', true, trans('quality-control.filterable.instructions.notBetween')),
+            'rank' => new FilterCriteria(['', '0'], 'rank', true, trans('quality-control.filterable.instructions.notBetween')),
+            'level' => new FilterCriteria(['', '50'], 'level', true, trans('quality-control.filterable.instructions.notBetween')),
+            'email' => new FilterCriteria('filter-email', 'email', true),
         ], true);
 
         $presented = [
@@ -927,7 +927,7 @@ class FilterableOrTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
@@ -941,7 +941,7 @@ class FilterableOrTest extends TestCase
         $output->remove('name');
         $output->remove('nickname');
 
-        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $result = $this->resource->getValidFilters($this->resource->getFilterCriteriaValidationRules(), $input);
         $this->assertEquals($output, $result);
     }
 }

@@ -6,7 +6,7 @@ use App\Contracts\DefaultFilterable;
 use App\Loom\FilterCollection;
 use App\Loom\FilterScope;
 use App\Traits\Weavable;
-use App\Loom\Filter;
+use App\Loom\FilterCriteria;
 use App\Loom\QualityControl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
@@ -24,8 +24,8 @@ class TestableResource extends Model implements DefaultFilterable
     {
         $filters = new FilterCollection();
         return $filters
-            ->addFilter('rank', new Filter(['0', '100'], 'rank', 'between'))
-            ->addFilter('level', new Filter(['50', '100'], 'level', 'between'));
+            ->addFilter('rank', new FilterCriteria(['0', '100'], 'rank', 'between'))
+            ->addFilter('level', new FilterCriteria(['50', '100'], 'level', 'between'));
     }
 
     /**

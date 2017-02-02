@@ -4,9 +4,10 @@ namespace App\Traits;
 
 use App\Contracts\DefaultFilterable;
 use App\Exceptions\LoomException;
-use App\Loom\Filter;
+use App\Loom\FilterCriteria;
 use App\Loom\FilterCollection;
 use App\Loom\FilterScope;
+use App\Loom\FilterSort;
 use App\Resources\LoomResource;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -15,15 +16,20 @@ trait Filterable
     use LoomConnectable;
 
     /**
-     * @return array
-     */
-    abstract public function getFilterValidationRules();
-
-    /**
      * @param string $scopeName
      * @return FilterScope
      */
     abstract public function getFilterScope($scopeName);
+
+    /**
+     * @return array
+     */
+    abstract public function getFilterCriteriaValidationRules();
+
+    /**
+     * @return array
+     */
+    abstract public function getSortableProperties();
 
     /**
      * @param $givenFilters
@@ -47,7 +53,7 @@ trait Filterable
                 }
             }
         } else {
-            $filters = $this->getValidFilters($this->getFilterValidationRules(), $givenFilters);
+            $filters = $this->getValidFilters($this->getFilterCriteriaValidationRules(), $givenFilters);
         }
 
         $filters->applyFilters($query);
@@ -79,8 +85,8 @@ trait Filterable
                     if (!ctype_alpha(key($givenFilters[$property]))) {
                         $rules[$property . '.*'] = $ruleSet;
                     } else {
-                        if ($potentialFilter = $this->processFilterInstructions($givenFilters[$property])) {
-                            $potentialFilters[$property] = $potentialFilter['filter'];
+                        if ($potentialFilter = $this->processFilterCriteriaInstructions($givenFilters[$property])) {
+                            $potentialFilters[$property] = $potentialFilter['criteria'];
                             $instructions[$property] = $potentialFilter['instruction'];
                         } else {
                             unset($potentialFilters[$property]);
@@ -96,31 +102,38 @@ trait Filterable
             }
         }
         $validFilters = validator($potentialFilters, $rules)->valid();
-        foreach ($validFilters as $property => $validFilter) {
-            $returnFilters->addFilter($property, new Filter($validFilter, $property, isset($instructions[$property]) ? $instructions[$property] : null));
+        foreach ($validFilters as $property => $criteria) {
+            $returnFilters->addFilter($property, new FilterCriteria($criteria, $property, $orTogether, isset($instructions[$property]) ? $instructions[$property] : null));
         }
 
         // Validate and include any connectable resource filters
         foreach ($this->getConnectableResources() as $resource) {
             if (!empty($givenFilters[$resource])) {
-                $resourceName = get_class($this->$resource()->getRelated());
+                $resourceClassName = get_class($this->$resource()->getRelated());
                 /**
                  * This comment is simply for IDE autocompletion OCD. :-)
                  * The real resource will be something different.
                  *
                  * @var LoomResource $resourceInstance
                  */
-                $resourceInstance = new $resourceName;
-                if ($valid = $resourceInstance->getValidFilters($resourceInstance->getFilterValidationRules(), $givenFilters[$resource])) {
+                $resourceInstance = new $resourceClassName;
+                if ($valid = $resourceInstance->getValidFilters($resourceInstance->getFilterCriteriaValidationRules(), $givenFilters[$resource])) {
                     $returnFilters->addFilter($resource, $valid);
                 }
             }
         }
 
-        // Validate and include any valid resource scopes
+        // Validate and include any resource scopes
         if (isset($givenFilters[trans('quality-control.filterable.__scope')])) {
-            if ($validFilterScopes = $this->getValidFilterScopes($givenFilters[trans('quality-control.filterable.__scope')])) {
+            if ($validFilterScopes = $this->getValidFilterScopes($givenFilters[trans('quality-control.filterable.__scope')], $orTogether)) {
                 $returnFilters->addCollection($validFilterScopes);
+            }
+        }
+
+        // Validate and include any sorts
+        if (isset($givenFilters[trans('quality-control.filterable.__sort')])) {
+            if ($validFilterSorts = $this->getValidFilterSorts($givenFilters[trans('quality-control.filterable.__sort')])) {
+                $returnFilters->addCollection($validFilterSorts);
             }
         }
 
@@ -129,12 +142,11 @@ trait Filterable
 
     /**
      * @param array $givenScopes
-     * @return FilterCollection
+     * @param $orTogether
+     * @return FilterCollection|bool
      */
-    protected function getValidFilterScopes(array $givenScopes)
+    protected function getValidFilterScopes(array $givenScopes, $orTogether)
     {
-        $orTogether = key($givenScopes) . '' == trans('quality-control.filterable.__or');
-        $givenScopes = !$orTogether ? $givenScopes : $givenScopes[trans('quality-control.filterable.__or')];
         $returnFilterScopes = new FilterCollection([], $orTogether);
         foreach ($givenScopes as $scope => $arguments) {
             if (ctype_digit($scope . '')) {
@@ -143,18 +155,56 @@ trait Filterable
             }
             if ($filterScope = $this->getFilterScope($scope)) {
                 if ($filterScope->validateAndSetInput($arguments)) {
+                    $filterScope->setOrTogether($orTogether);
                     $returnFilterScopes->addFilter(trans('quality-control.filterable.applied-scope'). ':' . $scope, $filterScope);
                 }
             }
         }
-        return $returnFilterScopes;
+        return $returnFilterScopes->isEmpty() ? false : $returnFilterScopes;
+    }
+
+    /**
+     * @param array $givenSorts
+     * @return FilterCollection
+     */
+    public function getValidFilterSorts(array $givenSorts)
+    {
+        $sortableProperties = $this->getSortableProperties();
+        $returnSorts = new FilterCollection();
+
+        foreach ($givenSorts as $order => $givenSort) {
+            $property = key($givenSort);
+            $direction = current($givenSort);
+
+            // validate and include a local resource sort
+            if (in_array($property, $sortableProperties)) {
+                $direction = in_array($direction, ['asc', 'desc']) ? $direction : 'asc';
+                $returnSorts->addFilter($property, new FilterSort($property, $direction));
+
+            // Validate and include a connectable resource sort
+            } elseif (in_array($property, $this->getConnectableResources())) {
+                $resourceClassName = get_class($this->$property()->getRelated());
+                $resourceInstance = new $resourceClassName;
+                /**
+                 * This comment is simply for IDE autocompletion OCD. :-)
+                 * The real resource will be something different.
+                 *
+                 * @var LoomResource $resourceInstance
+                 */
+                if ($validSorts = $resourceInstance->getValidFilterSorts($direction)) {
+                    $returnSorts->addFilter($property, $validSorts);
+                }
+            }
+        }
+
+        return $returnSorts;
     }
 
     /**
      * @param $givenFilter
      * @return array|bool
      */
-    protected function processFilterInstructions($givenFilter)
+    protected function processFilterCriteriaInstructions($givenFilter)
     {
         $instruction = key($givenFilter);
 
@@ -166,7 +216,7 @@ trait Filterable
                 if (count($givenFilter[$instruction]) != 2 || !is_string(current($givenFilter[$instruction])) || !is_string(next($givenFilter[$instruction]))) {
                     break;
                 }
-                $potentialFilter['filter'] = $givenFilter[$instruction];
+                $potentialFilter['criteria'] = $givenFilter[$instruction];
                 break;
             case trans('quality-control.filterable.instructions.applyScope'):
                 // pass-through
@@ -175,10 +225,10 @@ trait Filterable
             case trans('quality-control.filterable.instructions.not'):
                 // pass-through
             case trans('quality-control.filterable.instructions.notExactly'):
-                $potentialFilter['filter'] = $givenFilter[$instruction];
+                $potentialFilter['criteria'] = $givenFilter[$instruction];
                 break;
         }
 
-        return isset($potentialFilter['filter']) ? $potentialFilter : false;
+        return isset($potentialFilter['criteria']) ? $potentialFilter : false;
     }
 }
