@@ -29,7 +29,7 @@ class FilterCollectionTest extends TestCase
         try {
             $collection = new FilterCollection(['name' => 'not a filter']);
         } catch (LoomException $e) {
-            $this->assertEquals(trans('quality-control.filterable.expected-filter', ['got' => 'not a filter']), $e->getMessage());
+            $this->assertEquals(trans('quality-control.filterable.expected-filter-or-collection', ['got' => 'not a filter']), $e->getMessage());
         }
     }
 

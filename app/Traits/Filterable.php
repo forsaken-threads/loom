@@ -43,7 +43,7 @@ trait Filterable
             } else {
                 $filters = $this->getDefaultFilters();
                 if (!$filters instanceof FilterCollection) {
-                    throw new LoomException(trans('quality-control.filterable.get-default-filters-error', ['class' => __CLASS__, 'got' => get_class($filters)]));
+                    throw new LoomException(trans('quality-control.filterable.get-default-filters-error', ['class' => __CLASS__, 'got' => print_r($filters, true)]));
                 }
             }
         } else {
@@ -111,8 +111,7 @@ trait Filterable
                  * @var LoomResource $resourceInstance
                  */
                 $resourceInstance = new $resourceName;
-                $resourceFilters = key($givenFilters[$resource]) != trans('quality-control.filterable.__or') ? $givenFilters[$resource] : $givenFilters[$resource][trans('quality-control.filterable.__or')];
-                if ($valid = $resourceInstance->getValidFilters($resourceInstance->getFilterValidationRules(), $resourceFilters)) {
+                if ($valid = $resourceInstance->getValidFilters($resourceInstance->getFilterValidationRules(), $givenFilters[$resource])) {
                     $returnFilters->addFilter($resource, $valid);
                 }
             }

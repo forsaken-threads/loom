@@ -69,7 +69,14 @@ class FilterCollection
     {
         $method = camel_case(($this->orTogether ? 'Or' : '') . 'WhereHas');
         $query->$method($resource, function ($q) use ($filters) {
-            $filters->applyFilters($q);
+            /** @var Builder $q */
+            if (!$filters->orTogether) {
+                $filters->applyFilters($q);
+            } else {
+                $q->where(function ($subQuery) use ($filters) {
+                    $filters->applyFilters($subQuery);
+                });
+            }
         });
     }
 
@@ -94,6 +101,14 @@ class FilterCollection
     public function getCollection()
     {
         return $this->collection;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOrTogether()
+    {
+        return $this->orTogether;
     }
 
     /**

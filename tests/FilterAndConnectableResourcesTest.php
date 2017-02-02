@@ -96,7 +96,7 @@ class FilterAndConnectableResourcesTest extends TestCase
                 'address' => new Filter('filter-address', 'address'),
                 'city' => new Filter('filter-city', 'city'),
                 'state' => new Filter('MI', 'state'),
-            ])
+            ]),
         ]);
 
         $presented = [
@@ -105,7 +105,7 @@ class FilterAndConnectableResourcesTest extends TestCase
                 'address' => trans('quality-control.filterable.presenting.like') . 'filter-address',
                 'city' => trans('quality-control.filterable.presenting.like') . 'filter-city',
                 'state' => trans('quality-control.filterable.presenting.like') . 'MI',
-            ]
+            ],
         ];
 
         $query = [
@@ -113,6 +113,80 @@ class FilterAndConnectableResourcesTest extends TestCase
             'bindings' => [
                 'name',
                 '%filter-name%',
+                'address',
+                '%filter-address%',
+                'city',
+                '%filter-city%',
+                'state',
+                '%MI%',
+            ],
+        ];
+
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $this->assertEquals($output, $result);
+
+        $q = $this->resource->newQuery();
+        $this->assertEquals($presented, $this->resource->applyFilters($input, $q));
+        $q->get();
+        $log = DB::connection('testing')->getQueryLog();
+        $this->assertArraySubset($query, array_pop($log));
+    }
+
+    public function testConnectableFirstLevelMultiResources()
+    {
+        $input = [
+            'name' => 'filter-name',
+            'TestableConnectedFirstLevelHasOneResource' => [
+                'address' => 'filter-address',
+                'city' => 'filter-city',
+                'state' => 'MI',
+            ],
+            'TestableConnectedFirstLevelHasManyResource' => [trans('quality-control.filterable.__or') => [
+                'address' => 'filter-address',
+                'city' => 'filter-city',
+                'state' => 'MI',
+            ]],
+        ];
+
+        $output = new FilterCollection([
+            'name' => new Filter('filter-name', 'name'),
+            'TestableConnectedFirstLevelHasOneResource' => new FilterCollection([
+                'address' => new Filter('filter-address', 'address'),
+                'city' => new Filter('filter-city', 'city'),
+                'state' => new Filter('MI', 'state'),
+            ]),
+            'TestableConnectedFirstLevelHasManyResource' => new FilterCollection([
+                'address' => new Filter('filter-address', 'address'),
+                'city' => new Filter('filter-city', 'city'),
+                'state' => new Filter('MI', 'state'),
+            ], true)
+        ]);
+
+        $presented = [
+            'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
+            'TestableConnectedFirstLevelHasOneResource' => [
+                'address' => trans('quality-control.filterable.presenting.like') . 'filter-address',
+                'city' => trans('quality-control.filterable.presenting.like') . 'filter-city',
+                'state' => trans('quality-control.filterable.presenting.like') . 'MI',
+            ],
+            'TestableConnectedFirstLevelHasManyResource' => [
+                'address' => trans('quality-control.filterable.presenting.like') . 'filter-address',
+                'city' => trans('quality-control.filterable.presenting.like') . 'filter-city',
+                'state' => trans('quality-control.filterable.presenting.like') . 'MI',
+            ]
+        ];
+
+        $query = [
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_many_resources" where "testable_connected_first_level_has_many_resources"."testable_resource_id" = "testable_resources"."id" and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?)) and exists (select * from "testable_connected_first_level_has_one_resources" where "testable_connected_first_level_has_one_resources"."testable_resource_id" = "testable_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
+            'bindings' => [
+                'name',
+                '%filter-name%',
+                'address',
+                '%filter-address%',
+                'city',
+                '%filter-city%',
+                'state',
+                '%MI%',
                 'address',
                 '%filter-address%',
                 'city',

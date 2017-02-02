@@ -83,7 +83,7 @@ class FilterOrConnectableResourcesTest extends TestCase
     {
         $input = [
             'name' => 'filter-name',
-            'TestableConnectedFirstLevelHasOneResource' => ['__or' => [
+            'TestableConnectedFirstLevelHasOneResource' => [trans('quality-control.filterable.__or') => [
                 'address' => 'filter-address',
                 'city' => 'filter-city',
                 'state' => 'MI',
@@ -96,7 +96,7 @@ class FilterOrConnectableResourcesTest extends TestCase
                 'address' => new Filter('filter-address', 'address'),
                 'city' => new Filter('filter-city', 'city'),
                 'state' => new Filter('MI', 'state'),
-            ])
+            ], true)
         ]);
 
         $presented = [
@@ -109,7 +109,7 @@ class FilterOrConnectableResourcesTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? or exists (select * from "testable_connected_first_level_has_one_resources" where "testable_connected_first_level_has_one_resources"."testable_resource_id" = "testable_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_one_resources" where "testable_connected_first_level_has_one_resources"."testable_resource_id" = "testable_resources"."id" and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?))',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -129,7 +129,80 @@ class FilterOrConnectableResourcesTest extends TestCase
         $this->assertEquals($presented, $this->resource->applyFilters($input, $q, true));
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
-        dd($log);
+        $this->assertArraySubset($query, array_pop($log));
+    }
+
+    public function testConnectableFirstLevelMultiResources()
+    {
+        $input = [trans('quality-control.filterable.__or') => [
+            'name' => 'filter-name',
+            'TestableConnectedFirstLevelHasOneResource' => [
+                'address' => 'filter-address',
+                'city' => 'filter-city',
+                'state' => 'MI',
+            ],
+            'TestableConnectedFirstLevelHasManyResource' => [trans('quality-control.filterable.__or') => [
+                'address' => 'filter-address',
+                'city' => 'filter-city',
+                'state' => 'MI',
+            ]],
+        ]];
+
+        $output = new FilterCollection([
+            'name' => new Filter('filter-name', 'name'),
+            'TestableConnectedFirstLevelHasOneResource' => new FilterCollection([
+                'address' => new Filter('filter-address', 'address'),
+                'city' => new Filter('filter-city', 'city'),
+                'state' => new Filter('MI', 'state'),
+            ]),
+            'TestableConnectedFirstLevelHasManyResource' => new FilterCollection([
+                'address' => new Filter('filter-address', 'address'),
+                'city' => new Filter('filter-city', 'city'),
+                'state' => new Filter('MI', 'state'),
+            ], true)
+        ], true);
+
+        $presented = [
+            'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
+            'TestableConnectedFirstLevelHasOneResource' => [
+                'address' => trans('quality-control.filterable.presenting.like') . 'filter-address',
+                'city' => trans('quality-control.filterable.presenting.like') . 'filter-city',
+                'state' => trans('quality-control.filterable.presenting.like') . 'MI',
+            ],
+            'TestableConnectedFirstLevelHasManyResource' => [
+                'address' => trans('quality-control.filterable.presenting.like') . 'filter-address',
+                'city' => trans('quality-control.filterable.presenting.like') . 'filter-city',
+                'state' => trans('quality-control.filterable.presenting.like') . 'MI',
+            ]
+        ];
+
+        $query = [
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or exists (select * from "testable_connected_first_level_has_many_resources" where "testable_connected_first_level_has_many_resources"."testable_resource_id" = "testable_resources"."id" and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?)) or exists (select * from "testable_connected_first_level_has_one_resources" where "testable_connected_first_level_has_one_resources"."testable_resource_id" = "testable_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
+            'bindings' => [
+                'name',
+                '%filter-name%',
+                'address',
+                '%filter-address%',
+                'city',
+                '%filter-city%',
+                'state',
+                '%MI%',
+                'address',
+                '%filter-address%',
+                'city',
+                '%filter-city%',
+                'state',
+                '%MI%',
+            ],
+        ];
+
+        $result = $this->resource->getValidFilters($this->resource->getFilterValidationRules(), $input);
+        $this->assertEquals($output, $result);
+
+        $q = $this->resource->newQuery();
+        $this->assertEquals($presented, $this->resource->applyFilters($input, $q));
+        $q->get();
+        $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
     }
 
@@ -137,16 +210,16 @@ class FilterOrConnectableResourcesTest extends TestCase
     {
         $input = [
             'name' => 'filter-name',
-            'TestableConnectedFirstLevelHasOneResource' => [
+            'TestableConnectedFirstLevelHasOneResource' => [trans('quality-control.filterable.__or') => [
                 'address' => 'filter1-address',
                 'city' => 'filter1-city',
                 'state' => 'MI',
-                'TestableConnectedSecondLevelResource' => [
+                'TestableConnectedSecondLevelResource' => [trans('quality-control.filterable.__or') => [
                     'address' => 'filter2-address',
                     'city' => 'filter2-city',
                     'state' => 'FL',
-                ],
-            ],
+                ]],
+            ]],
         ];
 
         $output = new FilterCollection([
@@ -159,8 +232,8 @@ class FilterOrConnectableResourcesTest extends TestCase
                     'address' => new Filter('filter2-address', 'address'),
                     'city' => new Filter('filter2-city', 'city'),
                     'state' => new Filter('FL', 'state'),
-                ]),
-            ])
+                ], true),
+            ], true)
         ]);
 
         $presented = [
@@ -178,7 +251,7 @@ class FilterOrConnectableResourcesTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_one_resources" where "testable_connected_first_level_has_one_resources"."testable_resource_id" = "testable_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ? and exists (select * from "testable_connected_second_level_resources" where "testable_connected_second_level_resources"."testable_connected_first_level_has_one_resource_id" = "testable_connected_first_level_has_one_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?))',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_one_resources" where "testable_connected_first_level_has_one_resources"."testable_resource_id" = "testable_resources"."id" and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or exists (select * from "testable_connected_second_level_resources" where "testable_connected_second_level_resources"."testable_connected_first_level_has_one_resource_id" = "testable_connected_first_level_has_one_resources"."id" and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?))))',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -211,11 +284,11 @@ class FilterOrConnectableResourcesTest extends TestCase
     {
         $input = [
             'name' => 'filter-name',
-            'TestableConnectedFirstLevelHasManyResource' => [
+            'TestableConnectedFirstLevelHasManyResource' => [trans('quality-control.filterable.__or') => [
                 'address' => 'filter-address',
                 'city' => 'filter-city',
                 'state' => 'MI',
-            ],
+            ]],
         ];
 
         $output = new FilterCollection([
@@ -224,7 +297,7 @@ class FilterOrConnectableResourcesTest extends TestCase
                 'address' => new Filter('filter-address', 'address'),
                 'city' => new Filter('filter-city', 'city'),
                 'state' => new Filter('MI', 'state'),
-            ])
+            ], true)
         ]);
 
         $presented = [
@@ -237,7 +310,7 @@ class FilterOrConnectableResourcesTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_many_resources" where "testable_connected_first_level_has_many_resources"."testable_resource_id" = "testable_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_many_resources" where "testable_connected_first_level_has_many_resources"."testable_resource_id" = "testable_resources"."id" and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?))',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -264,11 +337,11 @@ class FilterOrConnectableResourcesTest extends TestCase
     {
         $input = [
             'name' => 'filter-name',
-            'TestableConnectedFirstLevelBelongsToResource' => [
+            'TestableConnectedFirstLevelBelongsToResource' => [trans('quality-control.filterable.__or') => [
                 'address' => 'filter-address',
                 'city' => 'filter-city',
                 'state' => 'MI',
-            ],
+            ]],
         ];
 
         $output = new FilterCollection([
@@ -277,7 +350,7 @@ class FilterOrConnectableResourcesTest extends TestCase
                 'address' => new Filter('filter-address', 'address'),
                 'city' => new Filter('filter-city', 'city'),
                 'state' => new Filter('MI', 'state'),
-            ])
+            ], true)
         ]);
 
         $presented = [
@@ -290,7 +363,7 @@ class FilterOrConnectableResourcesTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_belongs_to_resources" where "testable_resources"."testable_connected_first_level_belongs_to_resource_id" = "testable_connected_first_level_belongs_to_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_belongs_to_resources" where "testable_resources"."testable_connected_first_level_belongs_to_resource_id" = "testable_connected_first_level_belongs_to_resources"."id" and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?))',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -317,11 +390,11 @@ class FilterOrConnectableResourcesTest extends TestCase
     {
         $input = [
             'name' => 'filter-name',
-            'TestableConnectedFirstLevelBelongsToManyResource' => [
+            'TestableConnectedFirstLevelBelongsToManyResource' => [trans('quality-control.filterable.__or') => [
                 'address' => 'filter-address',
                 'city' => 'filter-city',
                 'state' => 'MI',
-            ],
+            ]],
         ];
 
         $output = new FilterCollection([
@@ -330,7 +403,7 @@ class FilterOrConnectableResourcesTest extends TestCase
                 'address' => new Filter('filter-address', 'address'),
                 'city' => new Filter('filter-city', 'city'),
                 'state' => new Filter('MI', 'state'),
-            ])
+            ], true)
         ]);
 
         $presented = [
@@ -343,7 +416,7 @@ class FilterOrConnectableResourcesTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_belongs_to_many_resources" inner join "testable_connected_first_level_belongs_to_many_resource_testable_resource" on "testable_connected_first_level_belongs_to_many_resources"."id" = "testable_connected_first_level_belongs_to_many_resource_testable_resource"."testable_connected_first_level_belongs_to_many_resource_id" where "testable_connected_first_level_belongs_to_many_resource_testable_resource"."testable_resource_id" = "testable_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_belongs_to_many_resources" inner join "testable_connected_first_level_belongs_to_many_resource_testable_resource" on "testable_connected_first_level_belongs_to_many_resources"."id" = "testable_connected_first_level_belongs_to_many_resource_testable_resource"."testable_connected_first_level_belongs_to_many_resource_id" where "testable_connected_first_level_belongs_to_many_resource_testable_resource"."testable_resource_id" = "testable_resources"."id" and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?))',
             'bindings' => [
                 'name',
                 '%filter-name%',

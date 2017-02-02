@@ -23,7 +23,7 @@ class TestableResourceTwo implements DefaultFilterable
      */
     public function getDefaultFilters()
     {
-        return false;
+        return 'bad juju';
     }
 
     /**

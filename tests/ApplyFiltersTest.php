@@ -193,7 +193,7 @@ class ApplyFiltersTest extends TestCase
         try {
             $resource->applyFilters([], $q);
         } catch (LoomException $e) {
-            $this->assertEquals(trans('quality-control.filterable.get-default-filters-error', ['class' => get_class($resource)]), $e->getMessage());
+            $this->assertEquals(trans('quality-control.filterable.get-default-filters-error', ['class' => get_class($resource), 'got' => print_r('bad juju', true)]), $e->getMessage());
         }
     }
 }
