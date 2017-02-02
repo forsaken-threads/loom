@@ -174,12 +174,13 @@ trait Filterable
 
         foreach ($givenSorts as $order => $givenSort) {
             $property = key($givenSort);
-            $direction = current($givenSort);
+            $instructions = current($givenSort);
 
             // validate and include a local resource sort
             if (in_array($property, $sortableProperties)) {
-                $direction = in_array($direction, ['asc', 'desc']) ? $direction : 'asc';
-                $returnSorts->addFilter($property, new FilterSort($property, $direction));
+                if ($instructions = $this->processFilterSortInstructions($instructions)) {
+                    $returnSorts->addFilter($property, new FilterSort($property, $instructions['direction'], $instructions['instruction']));
+                }
 
             // Validate and include a connectable resource sort
             } elseif (in_array($property, $this->getConnectableResources())) {
@@ -191,7 +192,7 @@ trait Filterable
                  *
                  * @var LoomResource $resourceInstance
                  */
-                if ($validSorts = $resourceInstance->getValidFilterSorts($direction)) {
+                if ($validSorts = $resourceInstance->getValidFilterSorts($instructions)) {
                     $returnSorts->addFilter($property, $validSorts);
                 }
             }
@@ -201,22 +202,22 @@ trait Filterable
     }
 
     /**
-     * @param $givenFilter
+     * @param $givenInstructions
      * @return array|bool
      */
-    protected function processFilterCriteriaInstructions($givenFilter)
+    protected function processFilterCriteriaInstructions($givenInstructions)
     {
-        $instruction = key($givenFilter);
+        $instruction = key($givenInstructions);
 
         $potentialFilter = ['instruction' => $instruction];
         switch ($instruction) {
             case trans('quality-control.filterable.instructions.between'):
                 // pass-through
             case trans('quality-control.filterable.instructions.notBetween'):
-                if (count($givenFilter[$instruction]) != 2 || !is_string(current($givenFilter[$instruction])) || !is_string(next($givenFilter[$instruction]))) {
+                if (count($givenInstructions[$instruction]) != 2 || !is_string(current($givenInstructions[$instruction])) || !is_string(next($givenInstructions[$instruction]))) {
                     break;
                 }
-                $potentialFilter['criteria'] = $givenFilter[$instruction];
+                $potentialFilter['criteria'] = $givenInstructions[$instruction];
                 break;
             case trans('quality-control.filterable.instructions.applyScope'):
                 // pass-through
@@ -225,10 +226,34 @@ trait Filterable
             case trans('quality-control.filterable.instructions.not'):
                 // pass-through
             case trans('quality-control.filterable.instructions.notExactly'):
-                $potentialFilter['criteria'] = $givenFilter[$instruction];
+                $potentialFilter['criteria'] = $givenInstructions[$instruction];
                 break;
         }
 
         return isset($potentialFilter['criteria']) ? $potentialFilter : false;
+    }
+
+    /**
+     * @param $givenInstructions
+     * @return string|bool
+     */
+    protected function processFilterSortInstructions($givenInstructions)
+    {
+        $instructions = [];
+        if (!is_array($givenInstructions)) {
+            $instructions['direction'] = in_array($givenInstructions, ['asc', 'desc']) ? $givenInstructions : 'asc';
+            $instructions['instruction'] = null;
+            return $instructions;
+        }
+
+        $instructions['direction'] = in_array(current($givenInstructions), ['asc', 'desc']) ? current($givenInstructions) : 'asc';
+        $instruction = key($givenInstructions);
+        switch ($instruction) {
+            case trans('quality-control.filterable.instructions.asString'):
+                $instructions['instruction'] =$instruction;
+                break;
+        }
+
+        return isset($instructions['instruction']) ? $instructions : false;
     }
 }

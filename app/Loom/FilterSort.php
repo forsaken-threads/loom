@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Builder;
 
 class FilterSort implements FilterContract
 {
+    /**
+     * @var string
+     */
+    protected $direction;
+
+    /**
+     * @var string
+     */
+    protected $instruction;
 
     /**
      * @var string
@@ -14,14 +23,17 @@ class FilterSort implements FilterContract
     protected $property;
 
     /**
-     * @var string
+     * FilterSort constructor.
+     *
+     * @param $property
+     * @param $direction
+     * @param null $instruction
      */
-    protected $direction;
-
-    public function __construct($property, $direction)
+    public function __construct($property, $direction, $instruction = null)
     {
         $this->property = $property;
         $this->direction = $direction;
+        $this->instruction = $instruction;
     }
 
     /**
@@ -29,8 +41,13 @@ class FilterSort implements FilterContract
      */
     public function applyFilter(Builder $query)
     {
-//        $query->orderByRaw('cast(? as char) ' . $this->sort, [$this->property]);
-        $query->orderBy($this->property, $this->direction);
+        switch ($this->instruction) {
+            case trans('quality-control.filterable.instructions.asChar'):
+                $query->orderByRaw('cast(? as char) ' . $this->direction, [$this->property]);
+                break;
+            default:
+                $query->orderBy($this->property, $this->direction);
+        }
     }
 
     /**
@@ -38,6 +55,11 @@ class FilterSort implements FilterContract
      */
     public function presentFilter()
     {
-        return trans('quality-control.filterable.presenting.order by') . $this->property . trans('quality-control.filterable.presenting.' . $this->direction);
+        switch ($this->instruction) {
+            case trans('quality-control.filterable.instructions.asChar'):
+                return trans('quality-control.filterable.presenting.order by') . $this->property . trans('quality-control.filterable.presenting.as a string') . trans('quality-control.filterable.presenting.' . $this->direction);
+            default:
+                return trans('quality-control.filterable.presenting.order by') . $this->property . trans('quality-control.filterable.presenting.' . $this->direction);
+        }
     }
 }
