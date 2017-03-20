@@ -2,7 +2,7 @@
 
 namespace ForsakenThreads\Loom\Tests;
 
-use App\Exceptions\LoomException;
+use App\Exceptions\QualityControlException;
 use DB;
 use ForsakenThreads\Loom\Tests\TestHelpers\TestableResource;
 use ForsakenThreads\Loom\Tests\TestHelpers\TestableResourceThree;
@@ -192,7 +192,7 @@ class ApplyFiltersTest extends TestCase
         $q = app(Builder::class);
         try {
             $resource->applyFilters([], $q);
-        } catch (LoomException $e) {
+        } catch (QualityControlException $e) {
             $this->assertEquals(trans('quality-control.filterable.get-default-filters-error', ['class' => get_class($resource), 'got' => print_r('bad juju', true)]), $e->getMessage());
         }
     }

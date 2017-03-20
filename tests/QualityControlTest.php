@@ -1,5 +1,6 @@
 <?php
 
+use App\Loom\Inspections;
 use App\Loom\QualityControl;
 use ForsakenThreads\Loom\Tests\TestCase;
 use Illuminate\Validation\Rule;
@@ -127,71 +128,71 @@ class QualityControlTest extends TestCase
 
     public function testDefaultRules()
     {
-        $this->assertEquals($this->defaultRules, $this->qc->getRules());
+        $this->assertEquals(new Inspections($this->defaultRules), $this->qc->getRules());
     }
 
     public function testRequireAll()
     {
-        $this->assertEquals($this->requireAllTest, $this->qc->getRules('require-all-test'));
+        $this->assertEquals(new Inspections($this->requireAllTest), $this->qc->getRules('require-all-test'));
     }
 
     public function testRequireExcept()
     {
-        $this->assertEquals($this->requireExceptTest, $this->qc->getRules('require-except-test'));
+        $this->assertEquals(new Inspections($this->requireExceptTest), $this->qc->getRules('require-except-test'));
     }
 
     public function testRequireOnly()
     {
-        $this->assertEquals($this->requireOnlyTest, $this->qc->getRules('require-only-test'));
+        $this->assertEquals(new Inspections($this->requireOnlyTest), $this->qc->getRules('require-only-test'));
     }
 
     public function testAppendAll()
     {
-        $this->assertEquals($this->appendAllTest, $this->qc->getRules('append-all-test'));
+        $this->assertEquals(new Inspections($this->appendAllTest), $this->qc->getRules('append-all-test'));
     }
 
     public function testAppendArrayInspection()
     {
-        $this->assertEquals($this->appendArrayTest, $this->qc->getRules('append-array-test'));
+        $this->assertEquals(new Inspections($this->appendArrayTest), $this->qc->getRules('append-array-test'));
     }
 
     public function testAppendObjectInspection()
     {
-        $this->assertEquals($this->appendObjectTest, $this->qc->getRules('append-object-test'));
+        $this->assertEquals(new Inspections($this->appendObjectTest), $this->qc->getRules('append-object-test'));
     }
 
     public function testAppendToField()
     {
-        $this->assertEquals($this->appendToFieldTest, $this->qc->getRules('append-to-field-test'));
+        $this->assertEquals(new Inspections($this->appendToFieldTest), $this->qc->getRules('append-to-field-test'));
     }
 
     public function testReplace()
     {
-        $this->assertEquals($this->replaceTest, $this->qc->getRules('replace-test'));
+        $this->assertEquals(new Inspections($this->replaceTest), $this->qc->getRules('replace-test'));
     }
 
     public function testAppendMulti()
     {
-        $this->assertEquals($this->appendMultiTest, $this->qc->getRules('append-multi-test'));
+        $this->assertEquals(new Inspections($this->appendMultiTest), $this->qc->getRules('append-multi-test'));
     }
 
     public function testRemove()
     {
-        $this->assertEquals($this->removeTest, $this->qc->getRules('remove-test'));
+        $this->assertEquals(new Inspections($this->removeTest), $this->qc->getRules('remove-test'));
     }
 
     public function testRemoveMulti()
     {
-        $this->assertEquals($this->removeMultiTest, $this->qc->getRules('remove-multi-test'));
+        $this->assertEquals(new Inspections($this->removeMultiTest), $this->qc->getRules('remove-multi-test'));
     }
 
     public function testReplaceMulti()
     {
-        $this->assertEquals($this->replaceMultiTest, $this->qc->getRules('replace-multi-test'));
+        $this->assertEquals(new Inspections($this->replaceMultiTest), $this->qc->getRules('replace-multi-test'));
     }
 
     public function testAppendMultiString()
     {
-        $this->assertEquals($this->appendMultiStringTest, $this->qc->getRules('append-multi-string-test'));
+        $this->assertEquals(new Inspections($this->appendMultiStringTest), $this->qc->getRules('append-multi-string-test'));
     }
 }

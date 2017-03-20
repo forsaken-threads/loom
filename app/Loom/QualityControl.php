@@ -2,7 +2,10 @@
 
 namespace App\Loom;
 
-class QualityControl
+use App\Contracts\QualityControlContract;
+use App\Exceptions\QualityControlException;
+
+class QualityControl implements QualityControlContract
 {
 
     /**
@@ -10,6 +13,13 @@ class QualityControl
      * @var array
      */
     protected $defaultRules;
+
+    /**
+     * Other resources that can be connected to the resource are managed
+     * through Quality Control.
+     * @var array
+     */
+    protected $connectableResources = [];
 
     /**
      * These transforms are applied to the defaultRules to get the rules
@@ -25,17 +35,17 @@ class QualityControl
     protected $editingContext;
 
     /**
-     * These messages are to customize the validator responses.
-     * @var array
-     */
-    protected $messages = [];
-
-    /**
      * Scopes that can be applied to resource indexes are managed through
      * Quality Control.
      * @var FilterScope[]
      */
     protected $filterScopes = [];
+
+    /**
+     * These messages are to customize the validator responses.
+     * @var array
+     */
+    protected $messages = [];
 
     /**
      * QualityControl constructor.
@@ -92,6 +102,14 @@ class QualityControl
     }
 
     /**
+     * @return array
+     */
+    public function getConnectableResources()
+    {
+        return $this->connectableResources;
+    }
+
+    /**
      * @param $scopeName
      * @return bool|FilterScope
      */
@@ -113,14 +131,19 @@ class QualityControl
 
     /**
      * @param null $context
-     * @return array
+     * @return Inspections
+     * @throws QualityControlException
      */
     public function getRules($context = null)
     {
         if (empty($context)) {
             $context = '__default';
         }
-        return $this->applyTransformations($context);
+        $rules = $this->applyTransformations($context);
+        if ($collisions = array_intersect(array_keys($rules), $this->connectableResources)) {
+            throw new QualityControlException(trans('quality-control.filterable.property-connectable-resource-collision', ['collisions' => implode(',', $collisions)]));
+        }
+        return new Inspections($rules);
     }
 
     /**
@@ -183,6 +206,16 @@ class QualityControl
             $fields = (array) $fields;
         }
         $this->append($fields, 'required');
+        return $this;
+    }
+
+    /**
+     * @param array $connectableResources
+     * @return $this
+     */
+    public function setConnectableResources($connectableResources)
+    {
+        $this->connectableResources = $connectableResources;
         return $this;
     }
 
@@ -267,37 +300,37 @@ class QualityControl
      */
     protected function applyTransformations($context)
     {
-        $baseRules = $this->defaultRules;
+        $contextRules = $this->defaultRules;
 
         if (empty($this->contextualTransformations[$context])) {
-            return $baseRules;
+            return $contextRules;
         }
 
         foreach ($this->contextualTransformations[$context] as $rules) {
             foreach ($rules as $transformation => $parameters) {
                 switch ($transformation) {
                     case 'append':
-                        if (isset($baseRules[$parameters[0]])) {
-                            $this->appendRule($baseRules[$parameters[0]], $parameters[1]);
+                        if (isset($contextRules[$parameters[0]])) {
+                            $this->appendRule($contextRules[$parameters[0]], $parameters[1]);
                         }
                         break;
                     case 'appendAll':
-                        foreach ($baseRules as $field => &$rules) {
+                        foreach ($contextRules as $field => &$rules) {
                             $this->appendRule($rules, $parameters);
                         }
                         break;
                     case 'remove':
                         foreach ($parameters as $parameter) {
-                            unset($baseRules[$parameter]);
+                            unset($contextRules[$parameter]);
                         }
                         break;
                     case 'replace':
-                        if (isset($baseRules[$parameters[0]])) {
-                            $baseRules[$parameters[0]] = $parameters[1];
+                        if (isset($contextRules[$parameters[0]])) {
+                            $contextRules[$parameters[0]] = $parameters[1];
                         }
                         break;
                     case 'requireAll':
-                        foreach ($baseRules as $field => &$rules) {
+                        foreach ($contextRules as $field => &$rules) {
                             $this->appendRule($rules, 'required');
                         }
                         break;
@@ -305,6 +338,6 @@ class QualityControl
             }
         }
 
-        return $baseRules;
+        return $contextRules;
     }
 }

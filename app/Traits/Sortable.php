@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait Sortable
 {
-    use LoomConnectable;
+    use Connectable;
 
     /** @var array */
     protected $defaultSort;

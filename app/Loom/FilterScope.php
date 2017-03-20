@@ -3,6 +3,7 @@
 namespace App\Loom;
 
 use App\Contracts\FilterContract;
+use App\Contracts\QualityControlContract;
 use Illuminate\Database\Eloquent\Builder;
 
 class FilterScope implements FilterContract
@@ -46,6 +47,27 @@ class FilterScope implements FilterContract
      * @var array
      */
     protected $validationRules = [];
+
+    /**
+     * @param array $givenScopes
+     * @param FilterCollection $collection
+     * @param QualityControlContract $qualityControl
+     */
+    public static function collect(array $givenScopes, FilterCollection $collection, QualityControlContract $qualityControl)
+    {
+        foreach ($givenScopes as $scope => $arguments) {
+            if (ctype_digit($scope . '')) {
+                $scope = $arguments;
+                $arguments = [];
+            }
+            if ($filterScope = $qualityControl->getFilterScope($scope)) {
+                if ($filterScope->validateAndSetInput($arguments)) {
+                    $filterScope->setOrTogether($collection->isOrTogether());
+                    $collection->addFilter(trans('quality-control.filterable.applied-scope'). ':' . $scope, $filterScope);
+                }
+            }
+        }
+    }
 
     /**
      * FilterScope constructor.

@@ -14,23 +14,16 @@ class TestableConnectedFirstLevelHasOneResource extends Model
     public $connection = 'testing';
 
     /**
-     * @return array
-     */
-    public function getConnectableResources()
-    {
-        return ['TestableConnectedSecondLevelResource'];
-    }
-
-    /**
      * @return QualityControl
      */
     public function getQualityControl()
     {
-        return new QualityControl([
+        $qc = new QualityControl([
             'address' => 'string|between:3,100',
             'city' => ['string' ,'between:2,20'],
             'state' => Rule::in(['FL', 'MI']),
         ]);
+        return $qc->setConnectableResources(['TestableConnectedSecondLevelResource']);
     }
 
     public function TestableConnectedSecondLevelResource()

@@ -17,16 +17,41 @@ class FilterCollection
     /**
      * @var bool
      */
+    protected $negated;
+
+    /**
+     * @var bool
+     */
     protected $orTogether;
+
+    /**
+     * @param array $givenFilters
+     * @return FilterCollection
+     */
+    public static function make(array &$givenFilters)
+    {
+        $negated = false;
+        if (key_exists(trans('quality-control.filterable.__not'), $givenFilters)) {
+            $negated = true;
+            $givenFilters = $givenFilters[trans('quality-control.filterable.__not')];
+        }
+        $orTogether = false;
+        if (key_exists(trans('quality-control.filterable.__or'), $givenFilters)) {
+            $orTogether = true;
+            $givenFilters = $givenFilters[trans('quality-control.filterable.__or')];
+        }
+        return new FilterCollection([], $orTogether, $negated);
+    }
 
     /**
      * FilterCollection constructor.
      *
      * @param array $filters
      * @param bool $orTogether
+     * @param bool $negated
      * @throws LoomException
      */
-    public function __construct(array $filters = [], $orTogether = false)
+    public function __construct(array $filters = [], $orTogether = false, $negated = false)
     {
         foreach ($filters as $property => $filter) {
             if (!ctype_alpha($property[0])) {
@@ -35,6 +60,7 @@ class FilterCollection
             $this->addFilter($property, $filter);
         }
         $this->orTogether = $orTogether;
+        $this->negated = $negated;
     }
 
     /**

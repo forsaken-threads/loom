@@ -6,7 +6,7 @@ use App\Contracts\DefaultFilterable;
 use App\Loom\FilterCollection;
 use App\Loom\FilterScope;
 use App\Traits\Weavable;
-use App\Loom\FilterCriteria;
+use App\Loom\FilterCriterion;
 use App\Loom\QualityControl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rule;
@@ -24,21 +24,8 @@ class TestableResource extends Model implements DefaultFilterable
     {
         $filters = new FilterCollection();
         return $filters
-            ->addFilter('rank', new FilterCriteria(['0', '100'], 'rank', 'between'))
-            ->addFilter('level', new FilterCriteria(['50', '100'], 'level', 'between'));
-    }
-
-    /**
-     * @return array
-     */
-    public function getConnectableResources()
-    {
-        return [
-            'TestableConnectedFirstLevelBelongsToResource',
-            'TestableConnectedFirstLevelBelongsToManyResource',
-            'TestableConnectedFirstLevelHasManyResource',
-            'TestableConnectedFirstLevelHasOneResource'
-        ];
+            ->addFilter('rank', new FilterCriterion(['0', '100'], 'rank', 'between'))
+            ->addFilter('level', new FilterCriterion(['50', '100'], 'level', 'between'));
     }
 
     /**
@@ -59,6 +46,12 @@ class TestableResource extends Model implements DefaultFilterable
             ->setArgumentDefault('level', 33)
             ->setValidationRules(['level' => 'numeric|between:30,100']);
         return $qc
+            ->setConnectableResources([
+                'TestableConnectedFirstLevelBelongsToResource',
+                'TestableConnectedFirstLevelBelongsToManyResource',
+                'TestableConnectedFirstLevelHasManyResource',
+                'TestableConnectedFirstLevelHasOneResource'
+            ])
             ->forContext('create')
                 ->requireAll()
                 ->append(['nickname', 'email'], Rule::unique('testable_resources'))

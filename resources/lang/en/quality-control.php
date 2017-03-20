@@ -2,13 +2,19 @@
 
 return [
     'filterable' => [
+        '__not' => '__not',
         '__or' => '__or',
+        '__pivot' => '__pivot',
         '__scope' => '__scope',
         '__sort' => '__sort',
+
         'applied-scope' => 'applied scope',
-        'get-default-filters-error' => 'Method getDefaultFilters for :class should return an instance of App\\Loom\\FilterCollection but got :got',
+
+        'property-connectable-resource-collision' => 'Tthe following collisions between properties and connectable resources have been detected: :collisions.',
         'expected-property' => 'Expected property name but received :property',
         'expected-filter-or-collection' => 'Expected instance of App\\Loom\\Filter or App\\Loom\\FilterCollection but received :got.',
+        'get-default-filters-error' => 'Method getDefaultFilters for :class should return an instance of App\\Loom\\FilterCollection but got :got.',
+
         'instructions' => [
             'asString' => 'asString',
             'between' => 'between',

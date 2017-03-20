@@ -14,14 +14,6 @@ class TestableConnectedFirstLevelBelongsToResource extends Model
     public $connection = 'testing';
 
     /**
-     * @return array
-     */
-    public function getConnectableResources()
-    {
-        return [];
-    }
-
-    /**
      * @return QualityControl
      */
     public function getQualityControl()

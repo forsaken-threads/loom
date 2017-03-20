@@ -2,7 +2,8 @@
 
 namespace App\Traits;
 
-use App\Loom\FilterContractScope;
+use App\Contracts\QualityControlContract;
+use App\Loom\Inspections;
 use App\Loom\QualityControl;
 
 trait QualityControllable
@@ -10,18 +11,11 @@ trait QualityControllable
     use Filterable;
 
     /**
-     * Get the Quality Control object for this class
-     *
-     * @return QualityControl
-     */
-    abstract public function getQualityControl();
-
-    /**
      * @param string $context
      * @param bool $allRulesTogether
-     * @return array
+     * @return Inspections|array
      */
-    public function getValidationRulesForContext($context = '__default', $allRulesTogether = true)
+    public function getInspectionsForContext($context = '__default', $allRulesTogether = true)
     {
         $qc = $this->getQualityControl();
 
@@ -57,29 +51,15 @@ trait QualityControllable
     }
 
     /**
-     * @return array
+     * Get the Quality Control object for this class.
+     * Any class that uses this trait should override this method.
+     * @return QualityControlContract
      */
-    public function getFilterCriteriaValidationRules()
+    public function getQualityControl()
     {
-        return $this->getValidationRulesForContext('filter');
+        return new QualityControl();
     }
 
-    /**
-     * @param $scopeName
-     * @return FilterContractScope
-     */
-    public function getFilterScope($scopeName)
-    {
-        return $this->getQualityControl()->getFilterScope($scopeName);
-    }
-
-    /**
-     * @return array
-     */
-    public function getSortableProperties()
-    {
-        return array_keys($this->getValidationRulesForContext('sort'));
-    }
     /**
      * @param $rule
      * @return bool

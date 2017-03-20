@@ -74,13 +74,13 @@ class FilterSortTest extends TestCase
     {
         $query = [
             'query' => 'select * from "testable_resources" order by cast(? as char) asc',
-            'bindings' => [],
+            'bindings' => ['rank'],
         ];
 
         $presented =  trans('quality-control.filterable.presenting.order by') . 'rank' . trans('quality-control.filterable.presenting.as a string') . trans('quality-control.filterable.presenting.asc');
 
         $q = $this->resource->newQuery();
-        $filterSort = new FilterSort('rank', 'asc', trans('quality-control.filterable.instructions.asChar'));
+        $filterSort = new FilterSort('rank', 'asc', trans('quality-control.filterable.instructions.asString'));
         $this->assertEquals($presented, $filterSort->presentFilter());
 
         $filterSort->applyFilter($q);
@@ -93,13 +93,13 @@ class FilterSortTest extends TestCase
     {
         $query = [
             'query' => 'select * from "testable_resources" order by cast(? as char) desc',
-            'bindings' => [],
+            'bindings' => ['rank'],
         ];
 
         $presented =  trans('quality-control.filterable.presenting.order by') . 'rank' . trans('quality-control.filterable.presenting.as a string') . trans('quality-control.filterable.presenting.desc');
 
         $q = $this->resource->newQuery();
-        $filterSort = new FilterSort('rank', 'desc', trans('quality-control.filterable.instructions.asChar'));
+        $filterSort = new FilterSort('rank', 'desc', trans('quality-control.filterable.instructions.asString'));
         $this->assertEquals($presented, $filterSort->presentFilter());
 
         $filterSort->applyFilter($q);
