@@ -4,9 +4,16 @@ namespace App\Contracts;
 
 use App\Loom\FilterScope;
 use App\Loom\Inspections;
+use App\Traits\QualityControllable;
 
 interface QualityControlContract
 {
+    /**
+     * @param $resource
+     * @return QualityControllable|bool
+     */
+    public function getConnectableResource($resource);
+
     /**
      * @return array
      */

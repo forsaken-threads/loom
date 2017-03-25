@@ -127,7 +127,7 @@ class FilterAndConnectableResourcesTest extends TestCase
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
-        $this->assertEquals($presented, $this->resource->applyFilters($input, $q));
+        $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
@@ -201,7 +201,7 @@ class FilterAndConnectableResourcesTest extends TestCase
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
-        $this->assertEquals($presented, $this->resource->applyFilters($input, $q));
+        $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
@@ -275,7 +275,7 @@ class FilterAndConnectableResourcesTest extends TestCase
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
-        $this->assertEquals($presented, $this->resource->applyFilters($input, $q));
+        $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
@@ -328,7 +328,7 @@ class FilterAndConnectableResourcesTest extends TestCase
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
-        $this->assertEquals($presented, $this->resource->applyFilters($input, $q));
+        $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
@@ -381,7 +381,7 @@ class FilterAndConnectableResourcesTest extends TestCase
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
-        $this->assertEquals($presented, $this->resource->applyFilters($input, $q));
+        $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));
@@ -395,21 +395,21 @@ class FilterAndConnectableResourcesTest extends TestCase
                 'address' => 'filter-address',
                 'city' => 'filter-city',
                 'state' => 'MI',
-//                '__pivot' => [
-//                    'divot' => 'filter-divot'
-//                ]
+                trans('quality-control.filterable.__pivot') => [
+                    'divot' => 'filter-divot'
+                ]
             ],
         ];
 
-        $output = new FilterCollection([
+        $output = FilterCollection::make([
             'name' => new FilterCriterion('filter-name', 'name'),
             'TestableConnectedFirstLevelBelongsToManyResource' => new FilterCollection([
                 'address' => new FilterCriterion('filter-address', 'address'),
                 'city' => new FilterCriterion('filter-city', 'city'),
                 'state' => new FilterCriterion('MI', 'state'),
-//                'divot' => new FilterCriterion('filter-divot', 'testable_connected_first_level_belongs_to_many_resource_testable_resource.divot')
+                trans('quality-control.filterable.__pivot') => new FilterCriterion('filter-divot', 'testable_connected_first_level_belongs_to_many_resource_testable_resource.divot')
             ])
-        ]);
+        ], $this->resource->getQualityControl());
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -435,10 +435,11 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $result = $this->resource->getValidFilters($input);
+        dd($result);
         $this->assertEquals($output, $result);
 
         $q = $this->resource->newQuery();
-        $this->assertEquals($presented, $this->resource->applyFilters($input, $q));
+        $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
         $log = DB::connection('testing')->getQueryLog();
         $this->assertArraySubset($query, array_pop($log));

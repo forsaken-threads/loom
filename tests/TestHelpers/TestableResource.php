@@ -35,7 +35,7 @@ class TestableResource extends Model implements DefaultFilterable
     {
         $qc = new QualityControl([
             'name' => 'string|between:3,100',
-            'nickname' => ['string' ,'between:2,20'],
+            'nick_name' => ['string' ,'between:2,20'],
             'email' => 'email',
             'rank' => 'integer|between:-100,100',
             'level' => 'integer|max:100',
@@ -46,7 +46,7 @@ class TestableResource extends Model implements DefaultFilterable
             ->setArgumentDefault('level', 33)
             ->setValidationRules(['level' => 'numeric|between:30,100']);
         return $qc
-            ->setConnectableResources([
+            ->setConnectableResources($this, [
                 'TestableConnectedFirstLevelBelongsToResource',
                 'TestableConnectedFirstLevelBelongsToManyResource',
                 'TestableConnectedFirstLevelHasManyResource',
@@ -54,9 +54,9 @@ class TestableResource extends Model implements DefaultFilterable
             ])
             ->forContext('create')
                 ->requireAll()
-                ->append(['nickname', 'email'], Rule::unique('testable_resources'))
+                ->append(['nick_name', 'email'], Rule::unique('testable_resources'))
             ->forContext('update')
-                ->append(['nickname', 'email'], Rule::unique('testable_resources')->whereNot('id', $this->id))
+                ->append(['nick_name', 'email'], Rule::unique('testable_resources')->whereNot('id', $this->id))
             ->forContext('filter')
                 ->replace(['name', 'email'], 'string')
             ->withScope('awesomePeople')

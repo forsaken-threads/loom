@@ -4,6 +4,7 @@ namespace App\Loom;
 
 use App\Contracts\FilterContract;
 use App\Contracts\QualityControlContract;
+use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Builder;
 
 class FilterCriterion implements FilterContract
@@ -48,7 +49,7 @@ class FilterCriterion implements FilterContract
                 if (!is_array($givenFilters[$property])) {
                     $rules[$property] = $ruleSet;
                 } else {
-                    if (!ctype_alpha(key($givenFilters[$property]))) {
+                    if (!ctype_alpha(key($givenFilters[$property])[0])) {
                         $rules[$property . '.*'] = $ruleSet;
                     } else {
                         if ($potentialFilter = self::processFilterCriteriaInstructions($givenFilters[$property])) {
@@ -71,6 +72,19 @@ class FilterCriterion implements FilterContract
         foreach ($validFilters as $property => $criteria) {
             $collection->addFilter($property,
                 new FilterCriterion($criteria, $property, $collection->isOrTogether(), isset($instructions[$property]) ? $instructions[$property] : null));
+        }
+
+        // Validate and include any connectable resource filters
+        foreach ($qualityControl->getConnectableResources() as $resource) {
+            if (!empty($givenFilters[$resource])) {
+                if ($resourceClassName = $qualityControl->getConnectableResource($resource)) {
+                    /** @var Filterable $resourceInstance */
+                    $resourceInstance = new $resourceClassName;
+                    if ($valid = $resourceInstance->getValidFilters($givenFilters[$resource])) {
+                        $collection->addFilter($resource, $valid);
+                    }
+                }
+            }
         }
     }
 

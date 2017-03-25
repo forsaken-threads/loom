@@ -74,8 +74,8 @@ class Inspections implements ArrayAccess, Iterator
      */
     public function offsetSet($property, $assurances)
     {
-        if (!ctype_alpha($property)) {
-            throw new QualityControlException(trans('quality-control.filterable.expected-property', ['property' => $property]));
+        if (!is_string($property) || !ctype_alpha($property[0])) {
+            throw new QualityControlException(trans('quality-control.filterable.expected-property', ['property' => @(string) $property]));
         }
         $key = array_search($property, $this->properties);
         $key = $key !== false ? $key : count($this->properties);

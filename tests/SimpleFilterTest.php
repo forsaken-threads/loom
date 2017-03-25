@@ -3,54 +3,17 @@
 namespace ForsakenThreads\Loom\Tests;
 
 use App\Exceptions\QualityControlException;
-use DB;
-use ForsakenThreads\Loom\Tests\TestHelpers\TestableResource;
 use ForsakenThreads\Loom\Tests\TestHelpers\TestableResourceThree;
 use ForsakenThreads\Loom\Tests\TestHelpers\TestableResourceTwo;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Schema\Blueprint;
-use Schema;
 
-class ApplyFiltersTest extends TestCase
+class SimpleFilterTest extends TestCase
 {
-    /** @var TestableResource */
-    protected $resource;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        Schema::connection('testing')->create('testable_resources', function (Blueprint $table) {
-            $table->string('id')->index();
-            $table->string('name', 100);
-            $table->string('nickname', 20)->unique();
-            $table->string('email')->unique();
-            $table->tinyInteger('rank');
-            $table->tinyInteger('level');
-            $table->string('password');
-            $table->timestamps();
-        });
-
-        Schema::connection('testing')->create('testable_resource_threes', function (Blueprint $table) {
-            $table->string('id')->index();
-            $table->string('name', 100);
-            $table->string('nickname', 20)->unique();
-            $table->string('email')->unique();
-            $table->tinyInteger('rank');
-            $table->tinyInteger('level');
-            $table->string('password');
-            $table->timestamps();
-        });
-
-        DB::connection('testing')->enableQueryLog();
-        $this->resource = new TestableResource();
-    }
-
-    public function testApplyFiltersGivenArray()
+    public function testFilterGivenArray()
     {
         $input = [
             'name' => 'filter-name',
-            'nickname' => ['filter1-nickname', 'filter2-nickname'],
+            'nick_name' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
             'level' => ['10', '-5', '0'],
             'email' => 'filter-email',
@@ -58,7 +21,7 @@ class ApplyFiltersTest extends TestCase
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
-            'nickname' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . 'filter1-nickname, filter2-nickname',
+            'nick_name' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . 'filter1-nickname, filter2-nickname',
             'rank' => trans('quality-control.filterable.presenting.like') . '0',
             'level' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . '10, -5, 0',
             'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
@@ -69,9 +32,9 @@ class ApplyFiltersTest extends TestCase
             'bindings' => [
                 'name',
                 '%filter-name%',
-                'nickname',
+                'nick_name',
                 '%filter1-nickname%',
-                'nickname',
+                'nick_name',
                 '%filter2-nickname%',
                 'email',
                 '%filter-email%',
@@ -87,19 +50,18 @@ class ApplyFiltersTest extends TestCase
         ];
 
         $q = $this->resource->newQuery();
-        $result = $this->resource->applyFilters($input, $q);
+        $result = $this->resource->filter($input, $q);
 
         $this->assertEquals($presented, $result);
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
-    public function testApplyFiltersGivenJson()
+    public function testFilterGivenJson()
     {
         $input = json_encode([
             'name' => 'filter-name',
-            'nickname' => ['filter1-nickname', 'filter2-nickname'],
+            'nick_name' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
             'level' => ['10', '-5', '0'],
             'email' => 'filter-email',
@@ -107,7 +69,7 @@ class ApplyFiltersTest extends TestCase
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
-            'nickname' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . 'filter1-nickname, filter2-nickname',
+            'nick_name' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . 'filter1-nickname, filter2-nickname',
             'rank' => trans('quality-control.filterable.presenting.like') . '0',
             'level' => trans('quality-control.filterable.presenting.like') . trans('quality-control.filterable.presenting.any of') . '10, -5, 0',
             'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
@@ -118,9 +80,9 @@ class ApplyFiltersTest extends TestCase
             'bindings' => [
                 'name',
                 '%filter-name%',
-                'nickname',
+                'nick_name',
                 '%filter1-nickname%',
-                'nickname',
+                'nick_name',
                 '%filter2-nickname%',
                 'email',
                 '%filter-email%',
@@ -136,12 +98,11 @@ class ApplyFiltersTest extends TestCase
         ];
 
         $q = $this->resource->newQuery();
-        $result = $this->resource->applyFilters($input, $q);
+        $result = $this->resource->filter($input, $q);
 
         $this->assertEquals($presented, $result);
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testNoDefaultFilter()
@@ -156,11 +117,9 @@ class ApplyFiltersTest extends TestCase
 
         $resource = new TestableResourceThree();
         $q = $resource->newQuery();
-        $this->assertEquals($presented, $resource->applyFilters([], $q));
+        $this->assertEquals($presented, $resource->filter([], $q));
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
-
+        $this->assertQueryEquals($query);
     }
 
     public function testValidDefaultFilter()
@@ -180,10 +139,9 @@ class ApplyFiltersTest extends TestCase
             ],
         ];
         $q = $this->resource->newQuery();
-        $this->assertEquals($presented, $this->resource->applyFilters([], $q));
+        $this->assertEquals($presented, $this->resource->filter([], $q));
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testInvalidDefaultFilter()
@@ -191,7 +149,7 @@ class ApplyFiltersTest extends TestCase
         $resource = new TestableResourceTwo();
         $q = app(Builder::class);
         try {
-            $resource->applyFilters([], $q);
+            $resource->filter([], $q);
         } catch (QualityControlException $e) {
             $this->assertEquals(trans('quality-control.filterable.get-default-filters-error', ['class' => get_class($resource), 'got' => print_r('bad juju', true)]), $e->getMessage());
         }

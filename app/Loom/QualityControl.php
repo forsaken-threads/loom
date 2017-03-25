@@ -4,6 +4,7 @@ namespace App\Loom;
 
 use App\Contracts\QualityControlContract;
 use App\Exceptions\QualityControlException;
+use App\Traits\QualityControllable;
 
 class QualityControl implements QualityControlContract
 {
@@ -46,6 +47,11 @@ class QualityControl implements QualityControlContract
      * @var array
      */
     protected $messages = [];
+
+    /**
+     * @var QualityControllable $resource
+     */
+    protected $resource;
 
     /**
      * QualityControl constructor.
@@ -99,6 +105,18 @@ class QualityControl implements QualityControlContract
             $this->messages[$context] = [];
         }
         return $this;
+    }
+
+    /**
+     * @param string $resource
+     * @return QualityControllable|bool
+     */
+    public function getConnectableResource($resource)
+    {
+        if (empty($this->resource) || !is_string($resource) || !in_array($resource, $this->connectableResources) || !method_exists($this->resource, $resource)) {
+            return false;
+        }
+        return $this->resource->$resource()->getRelated();
     }
 
     /**
@@ -210,11 +228,13 @@ class QualityControl implements QualityControlContract
     }
 
     /**
+     * @param QualityControllable $resource
      * @param array $connectableResources
      * @return $this
      */
-    public function setConnectableResources($connectableResources)
+    public function setConnectableResources($resource, $connectableResources)
     {
+        $this->resource = $resource;
         $this->connectableResources = $connectableResources;
         return $this;
     }

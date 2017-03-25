@@ -23,7 +23,7 @@ class TestableConnectedFirstLevelHasOneResource extends Model
             'city' => ['string' ,'between:2,20'],
             'state' => Rule::in(['FL', 'MI']),
         ]);
-        return $qc->setConnectableResources(['TestableConnectedSecondLevelResource']);
+        return $qc->setConnectableResources($this, ['TestableConnectedSecondLevelResource']);
     }
 
     public function TestableConnectedSecondLevelResource()

@@ -55,7 +55,10 @@ class FilterScope implements FilterContract
      */
     public static function collect(array $givenScopes, FilterCollection $collection, QualityControlContract $qualityControl)
     {
-        foreach ($givenScopes as $scope => $arguments) {
+        if (!isset($givenScopes[trans('quality-control.filterable.__scope')])) {
+            return;
+        }
+        foreach ($givenScopes[trans('quality-control.filterable.__scope')] as $scope => $arguments) {
             if (ctype_digit($scope . '')) {
                 $scope = $arguments;
                 $arguments = [];

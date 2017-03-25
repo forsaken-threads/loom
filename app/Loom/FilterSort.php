@@ -4,6 +4,7 @@ namespace App\Loom;
 
 use App\Contracts\FilterContract;
 use App\Contracts\QualityControlContract;
+use App\Traits\Filterable;
 use Illuminate\Database\Eloquent\Builder;
 
 class FilterSort implements FilterContract
@@ -30,12 +31,15 @@ class FilterSort implements FilterContract
      */
     public static function collect(array $givenSorts, FilterCollection $collection, QualityControlContract $qualityControl)
     {
+        if (!isset($givenSort[trans('quality-control.filterable.__sort')])) {
+            return;
+        }
+        // validate and include any local resource sorts
         $sortableProperties = array_keys($qualityControl->getRules(Inspections::SORT));
-        foreach ($givenSorts as $order => $givenSort) {
+        foreach ($givenSorts[trans('quality-control.filterable.__sort')] as $order => $givenSort) {
             $property = key($givenSort);
             $instructions = current($givenSort);
 
-            // validate and include a local resource sort
             if (in_array($property, $sortableProperties)) {
                 if ($instructions = self::processFilterSortInstructions($instructions)) {
                     $collection->addFilter($property, new FilterSort($property, $instructions['direction'], $instructions['instruction']));
@@ -43,6 +47,18 @@ class FilterSort implements FilterContract
             }
         }
 
+        // connectable resource sorts
+        foreach ($givenSorts[trans('quality-control.filterable.__sort')] as $order => $givenSort) {
+            $property = key($givenSort);
+            $instructions = current($givenSort);
+
+            if (in_array($property, $qualityControl->getConnectableResources())) {
+                $resourceClassName = $qualityControl->getConnectableResource($property);
+                $resourceInstance = new $resourceClassName;
+                /** @var Filterable $resourceInstance */
+                FilterSort::collect($instructions, $collection, $resourceInstance->getQualityControl());
+            }
+        }
     }
 
     /**

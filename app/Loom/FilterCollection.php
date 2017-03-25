@@ -3,6 +3,7 @@
 namespace App\Loom;
 
 use App\Contracts\FilterContract;
+use App\Contracts\QualityControlContract;
 use App\Exceptions\LoomException;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -26,9 +27,10 @@ class FilterCollection
 
     /**
      * @param array $givenFilters
+     * @param QualityControlContract $qualityControl
      * @return FilterCollection
      */
-    public static function make(array &$givenFilters)
+    public static function make(array $givenFilters, QualityControlContract $qualityControl)
     {
         $negated = false;
         if (key_exists(trans('quality-control.filterable.__not'), $givenFilters)) {
@@ -40,25 +42,30 @@ class FilterCollection
             $orTogether = true;
             $givenFilters = $givenFilters[trans('quality-control.filterable.__or')];
         }
-        return new FilterCollection([], $orTogether, $negated);
+
+        $collection = new FilterCollection($orTogether, $negated);
+
+        // Collect resource filters
+        FilterCriterion::collect($givenFilters, $collection, $qualityControl);
+
+        // Collect resource scopes
+        FilterScope::collect($givenFilters, $collection, $qualityControl);
+
+        // Collect sorts
+        FilterSort::collect($givenFilters, $collection, $qualityControl);
+
+        return $collection;
     }
 
     /**
      * FilterCollection constructor.
      *
-     * @param array $filters
      * @param bool $orTogether
      * @param bool $negated
      * @throws LoomException
      */
-    public function __construct(array $filters = [], $orTogether = false, $negated = false)
+    public function __construct($orTogether = false, $negated = false)
     {
-        foreach ($filters as $property => $filter) {
-            if (!ctype_alpha($property[0])) {
-                throw new LoomException(trans('quality-control.filterable.expected-property', ['property' => $property]));
-            }
-            $this->addFilter($property, $filter);
-        }
         $this->orTogether = $orTogether;
         $this->negated = $negated;
     }
@@ -81,8 +88,8 @@ class FilterCollection
      */
     public function addFilter($property, $filter)
     {
-        if (!ctype_alpha($property[0])) {
-            throw new LoomException(trans('quality-control.filterable.expected-property', ['property' => $property]));
+        if (!is_string($property) || !ctype_alpha($property[0])) {
+            throw new LoomException(trans('quality-control.filterable.expected-property', ['property' => @(string) $property]));
         }
         if (! $filter instanceof FilterContract && ! $filter instanceof FilterCollection) {
             throw new LoomException(trans('quality-control.filterable.expected-filter-or-collection', ['got' => print_r($filter, true)]));
