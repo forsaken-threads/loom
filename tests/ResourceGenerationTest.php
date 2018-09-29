@@ -30,9 +30,9 @@ class ResourceGenerationTest extends TestCase
      */
     protected $vfsRoot;
 
-    public function setUp()
+    public function setUp($withTestResources = true)
     {
-        parent::setUp();
+        parent::setUp(false);
 
         $this->vfsRoot = vfsStream::setup('scratch', null, ['resources' => [], 'routes' => []]);
         $this->resourcePath = $this->vfsRoot->getChild('resources');

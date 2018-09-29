@@ -43,6 +43,10 @@ class QualityControlTest extends TestCase
         'email' => ['email', 'nullable'],
     ];
 
+    protected $pivotTest = [
+        'pivot_field' => ['string', 'min:3']
+    ];
+
     protected $removeTest;
 
     protected $removeMultiTest;
@@ -71,9 +75,9 @@ class QualityControlTest extends TestCase
      */
     protected $qc;
 
-    public function setUp()
+    public function setUp($withTestResources = true)
     {
-        parent::setUp();
+        parent::setUp(false);
 
         $this->defaultRules['role'] = Rule::in(['Admin', 'User', 'Guest']);
         $this->appendAllTest['role'] = [Rule::in(['Admin', 'User', 'Guest']), 'bail'];
@@ -98,6 +102,7 @@ class QualityControlTest extends TestCase
         $this->requireOnlyTest['role'] = [Rule::in(['Admin', 'User', 'Guest']), 'required'];
         $this->qc = new QualityControl($this->defaultRules);
         $this->qc
+            ->withPivot('Resource1', ['pivot_field' => ['string', 'min:3']])
             ->forContext('require-all-test')
                 ->requireAll()
             ->forContext('require-except-test')
@@ -123,7 +128,11 @@ class QualityControlTest extends TestCase
             ->forContext('replace-multi-test')
                 ->replace(['name', 'email'], 'present')
             ->forContext('append-multi-string-test')
-                ->appendAll('present|bail');
+                ->appendAll('present|bail')
+            ->forContext('pivot-test-one')
+                ->requireAll('Resource1')
+            ->forContext('pivot-test-two')
+                ->replace('pivot_field', 'string', 'Resource1');
     }
 
     public function testDefaultRules()
@@ -194,5 +203,20 @@ class QualityControlTest extends TestCase
     public function testAppendMultiString()
     {
         $this->assertEquals(new Inspections($this->appendMultiStringTest), $this->qc->getRules('append-multi-string-test'));
+    }
+
+    public function testPivot()
+    {
+        $this->assertEquals(new Inspections($this->pivotTest), $this->qc->getFilterPivot('Resource1'));
+    }
+
+    public function testPivotOne()
+    {
+        $this->assertEquals(new Inspections(['pivot_field' => ['string', 'min:3', 'required']]), $this->qc->getFilterPivot('Resource1', 'pivot-test-one'));
+    }
+
+    public function testPivotTwo()
+    {
+        $this->assertEquals(new Inspections(['pivot_field' => 'string']), $this->qc->getFilterPivot('Resource1', 'pivot-test-two'));
     }
 }

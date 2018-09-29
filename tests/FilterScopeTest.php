@@ -3,35 +3,9 @@
 namespace ForsakenThreads\Loom\Tests;
 
 use App\Loom\FilterScope;
-use DB;
-use ForsakenThreads\Loom\Tests\TestHelpers\TestableResource;
-use Illuminate\Database\Schema\Blueprint;
-use Schema;
 
 class FilterScopeTest extends TestCase
 {
-    /** @var TestableResource */
-    protected $resource;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        Schema::connection('testing')->create('testable_resources', function (Blueprint $table) {
-            $table->string('id')->index();
-            $table->string('name', 100);
-            $table->string('nickname', 20)->unique();
-            $table->string('email')->unique();
-            $table->tinyInteger('rank');
-            $table->tinyInteger('level');
-            $table->string('password');
-            $table->timestamps();
-        });
-
-        DB::connection('testing')->enableQueryLog();
-        $this->resource = new TestableResource();
-    }
-
     public function testSimpleScope()
     {
         $query = [
@@ -45,8 +19,7 @@ class FilterScopeTest extends TestCase
         $filterScope = new FilterScope('awesomePeople');
         $filterScope->applyFilter($q);
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testScopeWithArg()
@@ -74,8 +47,7 @@ class FilterScopeTest extends TestCase
 
         $filterScope->applyFilter($q);
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testScopeWithMissingRequiredArg()
@@ -116,8 +88,7 @@ class FilterScopeTest extends TestCase
 
         $filterScope->applyFilter($q);
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testScopeWithMultiArgs()
@@ -149,8 +120,7 @@ class FilterScopeTest extends TestCase
 
         $filterScope->applyFilter($q);
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testScopeWithMultiArgsAndDefaultValue()
@@ -183,8 +153,7 @@ class FilterScopeTest extends TestCase
 
         $filterScope->applyFilter($q);
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testDefaultPresentation()

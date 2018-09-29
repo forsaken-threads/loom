@@ -54,9 +54,7 @@ class FilterSort implements FilterContract
 
             if (in_array($property, $qualityControl->getConnectableResources())) {
                 $resourceClassName = $qualityControl->getConnectableResource($property);
-                $resourceInstance = new $resourceClassName;
-                /** @var Filterable $resourceInstance */
-                FilterSort::collect($instructions, $collection, $resourceInstance->getQualityControl());
+                FilterSort::collect($instructions, $collection, with(new $resourceClassName)->getQualityControl());
             }
         }
     }

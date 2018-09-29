@@ -10,10 +10,11 @@ return [
 
         'applied-scope' => 'applied scope',
 
-        'property-connectable-resource-collision' => 'Tthe following collisions between properties and connectable resources have been detected: :collisions.',
-        'expected-property' => 'Expected property name but received :property',
         'expected-filter-or-collection' => 'Expected instance of App\\Loom\\Filter or App\\Loom\\FilterCollection but received :got.',
+        'expected-property' => 'Expected property name but received :property',
         'get-default-filters-error' => 'Method getDefaultFilters for :class should return an instance of App\\Loom\\FilterCollection but got :got.',
+        'primary-not-found' => 'While collecting filters for a pivot table, the primary resource could not be determined. The secondary resource is :secondary.',
+        'property-connectable-resource-collision' => 'The following collisions between properties and connectable resources have been detected: :collisions.',
 
         'instructions' => [
             'asString' => 'asString',

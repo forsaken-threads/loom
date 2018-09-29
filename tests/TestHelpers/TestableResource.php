@@ -52,6 +52,7 @@ class TestableResource extends Model implements DefaultFilterable
                 'TestableConnectedFirstLevelHasManyResource',
                 'TestableConnectedFirstLevelHasOneResource'
             ])
+            ->withPivot('TestableConnectedFirstLevelBelongsToManyResource', ['divot' => 'string|min:3'])
             ->forContext('create')
                 ->requireAll()
                 ->append(['nick_name', 'email'], Rule::unique('testable_resources'))
@@ -59,6 +60,7 @@ class TestableResource extends Model implements DefaultFilterable
                 ->append(['nick_name', 'email'], Rule::unique('testable_resources')->whereNot('id', $this->id))
             ->forContext('filter')
                 ->replace(['name', 'email'], 'string')
+                ->replace('divot', 'string', 'TestableConnectedFirstLevelBelongsToManyResources')
             ->withScope('awesomePeople')
             ->withScope($filterScope);
     }

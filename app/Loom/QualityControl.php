@@ -46,12 +46,20 @@ class QualityControl implements QualityControlContract
      * These messages are to customize the validator responses.
      * @var array
      */
-    protected $messages = [];
+    protected $messages = ['__default' => []];
 
     /**
-     * @var QualityControllable $resource
+     * Rules for belongsToMany pivot tables.
+     * These rules, if needed, can be set one or the other of the
+     * two connected resources.
+     * @var array
      */
-    protected $resource;
+    protected $pivots = ['__default' => []];
+
+    /**
+     * @var QualityControllable|bool $resource
+     */
+    protected $resource = false;
 
     /**
      * QualityControl constructor.
@@ -67,26 +75,36 @@ class QualityControl implements QualityControlContract
     /**
      * @param $fields
      * @param $rule
+     * @param null $pivotResource
      * @return $this
      */
-    public function append($fields, $rule)
+    public function append($fields, $rule, $pivotResource = null)
     {
         if (!is_array($fields)) {
             $fields = (array) $fields;
         }
         foreach ($fields as $field) {
-            $this->contextualTransformations[$this->editingContext][] = ['append' => [$field, $rule]];
+            if (!$pivotResource) {
+                $this->contextualTransformations[$this->editingContext][] = ['append' => [$field, $rule]];
+            } else {
+                $this->pivots[$this->editingContext][$pivotResource][] = ['append' => [$field, $rule]];
+            }
         }
         return $this;
     }
 
     /**
      * @param $rules
+     * @param null $pivotResource
      * @return $this
      */
-    public function appendAll($rules)
+    public function appendAll($rules, $pivotResource = null)
     {
-        $this->contextualTransformations[$this->editingContext][] = ['appendAll' => $rules];
+        if (!$pivotResource) {
+            $this->contextualTransformations[$this->editingContext][] = ['appendAll' => $rules];
+        } else {
+            $this->pivots[$this->editingContext][$pivotResource][] = ['appendAll' => $rules];
+        }
         return $this;
     }
 
@@ -103,6 +121,9 @@ class QualityControl implements QualityControlContract
         }
         if (!isset($this->messages[$context])) {
             $this->messages[$context] = [];
+        }
+        if (!isset($this->pivots[$context])) {
+            $this->pivots[$context] = [];
         }
         return $this;
     }
@@ -128,6 +149,28 @@ class QualityControl implements QualityControlContract
     }
 
     /**
+     * @param string $resource
+     * @param null|string $context
+     * @return Inspections|bool
+     */
+    public function getFilterPivot($resource, $context = null)
+    {
+        if (empty($context)) {
+            $context = '__default';
+        }
+
+        $rules = !empty($this->pivots['__default'][$resource])
+            ? $this->pivots['__default'][$resource]
+            : [];
+
+        if ($context != '__default' && !empty($this->pivots[$context][$resource])) {
+            $rules = $this->applyTransformations($rules, $this->pivots[$context][$resource]);
+        }
+
+        return new Inspections($rules);
+    }
+
+    /**
      * @param $scopeName
      * @return bool|FilterScope
      */
@@ -148,6 +191,14 @@ class QualityControl implements QualityControlContract
     }
 
     /**
+     * @return QualityControllable|bool
+     */
+    public function getResource()
+    {
+        return $this->resource;
+    }
+
+    /**
      * @param null $context
      * @return Inspections
      * @throws QualityControlException
@@ -157,73 +208,98 @@ class QualityControl implements QualityControlContract
         if (empty($context)) {
             $context = '__default';
         }
-        $rules = $this->applyTransformations($context);
+
+        $rules = $this->defaultRules;
+
+        if (!empty($this->contextualTransformations[$context])) {
+            $rules = $this->applyTransformations($rules, $this->contextualTransformations[$context]);
+        }
+
         if ($collisions = array_intersect(array_keys($rules), $this->connectableResources)) {
             throw new QualityControlException(trans('quality-control.filterable.property-connectable-resource-collision', ['collisions' => implode(',', $collisions)]));
         }
+
         return new Inspections($rules);
     }
 
     /**
      * @param $fields
+     * @param null $pivotResource
      * @return $this
      */
-    public function remove($fields)
+    public function remove($fields, $pivotResource = null)
     {
         if (!is_array($fields)) {
             $fields = (array) $fields;
         }
-        $this->contextualTransformations[$this->editingContext][] = ['remove' => $fields];
+        if (!$pivotResource) {
+            $this->contextualTransformations[$this->editingContext][] = ['remove' => $fields];
+        } else {
+            $this->pivots[$this->editingContext][$pivotResource][] = ['remove' => $fields];
+        }
         return $this;
     }
+
     /**
      * @param $fields
      * @param $rule
+     * @param null $pivotResource
      * @return $this
      */
-    public function replace($fields, $rule)
+    public function replace($fields, $rule, $pivotResource = null)
     {
         if (!is_array($fields)) {
             $fields = (array) $fields;
         }
         foreach ($fields as $field) {
-            $this->contextualTransformations[$this->editingContext][] = ['replace' => [$field, $rule]];
+            if (!$pivotResource) {
+                $this->contextualTransformations[$this->editingContext][] = ['replace' => [$field, $rule]];
+            } else {
+                $this->pivots[$this->editingContext][$pivotResource][] = ['replace' => [$field, $rule]];
+            }
         }
         return $this;
     }
 
     /**
+     * @param null $pivotResource
      * @return $this
      */
-    public function requireAll()
+    public function requireAll($pivotResource = null)
     {
-        $this->contextualTransformations[$this->editingContext][] = ['requireAll' => true];
+        if (!$pivotResource) {
+            $this->contextualTransformations[$this->editingContext][] = ['requireAll' => true];
+        } else {
+            $this->pivots[$this->editingContext][$pivotResource][] = ['requireAll' => true];
+        }
         return $this;
     }
 
     /**
      * @param $fields
+     * @param null $pivotResource
      * @return $this
      */
-    public function requireExcept($fields)
+    public function requireExcept($fields, $pivotResource = null)
     {
         if (!is_array($fields)) {
             $fields = (array) $fields;
         }
-        $this->append(array_diff(array_keys($this->defaultRules), $fields), 'required');
+        $this->append(array_diff(array_keys($this->defaultRules), $fields), 'required', $pivotResource);
         return $this;
     }
 
     /**
      * @param $fields
+     * @param null $pivotResource
      * @return $this
      */
-    public function requireOnly($fields)
+    public function requireOnly($fields, $pivotResource = null)
     {
         if (!is_array($fields)) {
             $fields = (array) $fields;
         }
-        $this->append($fields, 'required');
+        $this->append($fields, 'required', $pivotResource);
         return $this;
     }
 
@@ -246,6 +322,17 @@ class QualityControl implements QualityControlContract
     public function withMessages($messages)
     {
         $this->messages[$this->editingContext] = $messages;
+        return $this;
+    }
+
+    /**
+     * @param string $resource
+     * @param $rules
+     * @return $this
+     */
+    public function withPivot($resource, $rules)
+    {
+        $this->pivots[$this->editingContext][$resource] = $rules;
         return $this;
     }
 
@@ -315,18 +402,13 @@ class QualityControl implements QualityControlContract
     }
 
     /**
-     * @param $context
+     * @param array $contextRules
+     * @param $contextualTransformations
      * @return array
      */
-    protected function applyTransformations($context)
+    protected function applyTransformations(array $contextRules, $contextualTransformations)
     {
-        $contextRules = $this->defaultRules;
-
-        if (empty($this->contextualTransformations[$context])) {
-            return $contextRules;
-        }
-
-        foreach ($this->contextualTransformations[$context] as $rules) {
+        foreach ($contextualTransformations as $rules) {
             foreach ($rules as $transformation => $parameters) {
                 switch ($transformation) {
                     case 'append':

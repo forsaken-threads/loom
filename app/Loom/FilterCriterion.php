@@ -78,10 +78,9 @@ class FilterCriterion implements FilterContract
         foreach ($qualityControl->getConnectableResources() as $resource) {
             if (!empty($givenFilters[$resource])) {
                 if ($resourceClassName = $qualityControl->getConnectableResource($resource)) {
-                    /** @var Filterable $resourceInstance */
-                    $resourceInstance = new $resourceClassName;
-                    if ($valid = $resourceInstance->getValidFilters($givenFilters[$resource])) {
-                        $collection->addFilter($resource, $valid);
+                    $filters = FilterCollection::make($givenFilters[$resource], with(new $resourceClassName)->getQualityControl());
+                    if (!$filters->isEmpty()) {
+                        $collection->addFilter($resource, $filters);
                     }
                 }
             }

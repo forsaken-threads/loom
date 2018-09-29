@@ -6,6 +6,7 @@ use App\Contracts\FilterContract;
 use App\Contracts\QualityControlContract;
 use App\Exceptions\LoomException;
 use Illuminate\Database\Eloquent\Builder;
+use Loom\FilterPivot;
 
 class FilterCollection
 {
@@ -14,6 +15,11 @@ class FilterCollection
      * @var array
      */
     protected $collection = [];
+
+    /**
+     * @var FilterPivot
+     */
+    protected $filterPivot;
 
     /**
      * @var bool
@@ -28,22 +34,30 @@ class FilterCollection
     /**
      * @param array $givenFilters
      * @param QualityControlContract $qualityControl
+     * @param null|QualityControlContract $sourceQualityControl
      * @return FilterCollection
      */
-    public static function make(array $givenFilters, QualityControlContract $qualityControl)
+    public static function make(array $givenFilters, QualityControlContract $qualityControl, $sourceQualityControl = null)
     {
         $negated = false;
         if (key_exists(trans('quality-control.filterable.__not'), $givenFilters)) {
             $negated = true;
             $givenFilters = $givenFilters[trans('quality-control.filterable.__not')];
         }
+
         $orTogether = false;
         if (key_exists(trans('quality-control.filterable.__or'), $givenFilters)) {
             $orTogether = true;
             $givenFilters = $givenFilters[trans('quality-control.filterable.__or')];
         }
 
-        $collection = new FilterCollection($orTogether, $negated);
+        $filterPivot = [];
+        if (key_exists(trans('quality-control.filterable.__pivot'), $givenFilters) && $sourceQualityControl != null) {
+            $filterPivot = FilterPivot::collect($givenFilters[trans('quality-control.filterable.__pivot')], $qualityControl, $sourceQualityControl);
+        }
+        unset($givenFilters[trans('quality-control.filterable.__pivot')]);
+
+        $collection = new FilterCollection($orTogether, $negated, $filterPivot);
 
         // Collect resource filters
         FilterCriterion::collect($givenFilters, $collection, $qualityControl);
@@ -62,12 +76,13 @@ class FilterCollection
      *
      * @param bool $orTogether
      * @param bool $negated
-     * @throws LoomException
+     * @param null|FilterPivot $filterPivot
      */
-    public function __construct($orTogether = false, $negated = false)
+    public function __construct($orTogether = false, $negated = false, /*FilterPivot*/ $filterPivot = null)
     {
         $this->orTogether = $orTogether;
         $this->negated = $negated;
+        $this->filterPivot = $filterPivot;
     }
 
     /**

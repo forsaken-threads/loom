@@ -46,9 +46,9 @@ class GenerateResourceCommandTest extends TestCase
      */
     protected $vfsRoot;
 
-    public function setUp()
+    public function setUp($withTestResources = true)
     {
-        parent::setUp();
+        parent::setUp(false);
 
         $this->command = Mockery::mock('App\\Console\\Commands\\GenerateResource[ask,confirm,error]');
         $this->app[Kernel::class]->registerCommand($this->command);

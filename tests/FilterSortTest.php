@@ -4,34 +4,9 @@ namespace ForsakenThreads\Loom\Tests;
 
 use App\Loom\FilterSort;
 use DB;
-use ForsakenThreads\Loom\Tests\TestHelpers\TestableResource;
-use Illuminate\Database\Schema\Blueprint;
-use Schema;
 
 class FilterSortTest extends TestCase
 {
-    /** @var TestableResource */
-    protected $resource;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        Schema::connection('testing')->create('testable_resources', function (Blueprint $table) {
-            $table->string('id')->index();
-            $table->string('name', 100);
-            $table->string('nickname', 20)->unique();
-            $table->string('email')->unique();
-            $table->tinyInteger('rank');
-            $table->tinyInteger('level');
-            $table->string('password');
-            $table->timestamps();
-        });
-
-        DB::connection('testing')->enableQueryLog();
-        $this->resource = new TestableResource();
-    }
-
     public function testSimpleSortAscending()
     {
         $query = [
@@ -47,8 +22,7 @@ class FilterSortTest extends TestCase
 
         $filterSort->applyFilter($q);
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testSimpleSortDescending()
@@ -66,8 +40,7 @@ class FilterSortTest extends TestCase
 
         $filterSort->applyFilter($q);
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testAsCharSortAscending()
@@ -85,8 +58,7 @@ class FilterSortTest extends TestCase
 
         $filterSort->applyFilter($q);
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testAsCharSortDescending()
@@ -104,8 +76,7 @@ class FilterSortTest extends TestCase
 
         $filterSort->applyFilter($q);
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
 }

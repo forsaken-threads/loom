@@ -22,9 +22,9 @@ class ResourceControllerGenerationTest extends TestCase
      */
     protected $vfsRoot;
 
-    public function setUp()
+    public function setUp($withTestResources = true)
     {
-        parent::setUp();
+        parent::setUp(false);
 
         $this->vfsRoot = vfsStream::setup('scratch', null, ['controllers' => []]);
         $this->controllerPath = $this->vfsRoot->getChild('controllers');

@@ -20,6 +20,13 @@ interface QualityControlContract
     public function getConnectableResources();
 
     /**
+     * @param $resource
+     * @param null|string $context
+     * @return Inspections|bool
+     */
+    public function getFilterPivot($resource, $context = null);
+
+    /**
      * @param $scopeName
      * @return FilterScope|bool
      */
@@ -29,6 +36,11 @@ interface QualityControlContract
      * @return array
      */
     public function getMessages();
+
+    /**
+     * @return QualityControllable|bool
+     */
+    public function getResource();
 
     /**
      * @param null $context

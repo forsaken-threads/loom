@@ -2,17 +2,17 @@
 
 namespace ForsakenThreads\Loom\Tests;
 
-class FilterableAndTest extends TestCase
+class FilterOrTest extends TestCase
 {
     public function testSimpleFilters()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => 'filter-name',
             'nick_name' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
             'level' => ['10', '-5', '0'],
             'email' => 'filter-email',
-        ];
+        ]];
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -23,7 +23,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ?) and cast(? as char) like ? and cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?)',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -52,7 +52,7 @@ class FilterableAndTest extends TestCase
 
     public function testSimpleFiltersAndSimpleScope()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => 'filter-name',
             'nick_name' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
@@ -61,7 +61,7 @@ class FilterableAndTest extends TestCase
             trans('quality-control.filterable.__scope') => [
                 'awesomePeople'
             ]
-        ];
+        ]];
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -73,7 +73,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ?) and cast(? as char) like ? and cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?) and "level" > ?',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or ("level" > ?)',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -103,16 +103,16 @@ class FilterableAndTest extends TestCase
 
     public function testSimpleFiltersAndAlternativeSimpleScope()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => 'filter-name',
             'nick_name' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
             'level' => ['10', '-5', '0'],
             'email' => 'filter-email',
             trans('quality-control.filterable.__scope') => [
-                'awesomePeople' => [],
+                'awesomePeople' => []
             ]
-        ];
+        ]];
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -124,7 +124,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ?) and cast(? as char) like ? and cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?) and "level" > ?',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or ("level" > ?)',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -154,16 +154,16 @@ class FilterableAndTest extends TestCase
 
     public function testSimpleFiltersAndComplexScope()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => 'filter-name',
             'nick_name' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
             'level' => ['10', '-5', '0'],
             'email' => 'filter-email',
             trans('quality-control.filterable.__scope') => [
-                'awesomeishPeople' => ['level' => 40],
+                'awesomeishPeople' => ['level' => 40]
             ]
-        ];
+        ]];
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -175,7 +175,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ?) and cast(? as char) like ? and cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?) and "level" > ?',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or ("level" > ?)',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -205,16 +205,16 @@ class FilterableAndTest extends TestCase
 
     public function testSimpleFiltersAndInvalidScope()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => 'filter-name',
             'nick_name' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
             'level' => ['10', '-5', '0'],
             'email' => 'filter-email',
             trans('quality-control.filterable.__scope') => [
-                'awesomeishPeople' => ['level' => 20],
-            ]
-        ];
+                'awesomeishPeople' => ['level' => 20]
+            ],
+        ]];
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -225,7 +225,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ?) and cast(? as char) like ? and cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?)',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -254,16 +254,16 @@ class FilterableAndTest extends TestCase
 
     public function testSimpleFiltersAndComplexScopeWithDefaultValue()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => 'filter-name',
             'nick_name' => ['filter1-nickname', 'filter2-nickname'],
             'rank' => '0',
             'level' => ['10', '-5', '0'],
             'email' => 'filter-email',
             trans('quality-control.filterable.__scope') => [
-                'awesomeishPeople',
-            ]
-        ];
+                'awesomeishPeople'
+            ],
+        ]];
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -275,7 +275,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ?) and cast(? as char) like ? and cast(? as char) like ? and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?) and "level" > ?',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ? or ("level" > ?)',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -305,13 +305,13 @@ class FilterableAndTest extends TestCase
 
     public function testExactlyFilters()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => [trans('quality-control.filterable.instructions.exactly') => ['filter1-name', 'filter2-name']],
             'nick_name' => [trans('quality-control.filterable.instructions.exactly') => 'filter-nickname'],
             'rank' => [trans('quality-control.filterable.instructions.exactly') => '0'],
             'level' => [trans('quality-control.filterable.instructions.exactly') => ['10', '-5', '0']],
             'email' => 'filter-email',
-        ];
+        ]];
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.is') . trans('quality-control.filterable.presenting.any of') . 'filter1-name, filter2-name',
@@ -322,7 +322,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where "name" in (?, ?) and "nick_name" = ? and cast(? as char) like ? and "rank" = ? and "level" in (?, ?, ?)',
+            'query' => 'select * from "testable_resources" where "name" in (?, ?) or "nick_name" = ? or cast(? as char) like ? or "rank" = ? or "level" in (?, ?, ?)',
             'bindings' => [
                 'filter1-name',
                 'filter2-name',
@@ -344,13 +344,13 @@ class FilterableAndTest extends TestCase
 
     public function testNotExactlyFilters()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => [trans('quality-control.filterable.instructions.notExactly') => ['filter1-name', 'filter2-name']],
             'nick_name' => [trans('quality-control.filterable.instructions.notExactly') => 'filter-nickname'],
             'rank' => [trans('quality-control.filterable.instructions.notExactly') => '0'],
             'level' => [trans('quality-control.filterable.instructions.notExactly') => ['10', '-5', '0']],
             'email' => 'filter-email',
-        ];
+        ]];
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.is not') . trans('quality-control.filterable.presenting.any of') . 'filter1-name, filter2-name',
@@ -361,7 +361,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where "name" not in (?, ?) and "nick_name" != ? and cast(? as char) like ? and "rank" != ? and "level" not in (?, ?, ?)',
+            'query' => 'select * from "testable_resources" where "name" not in (?, ?) or "nick_name" != ? or cast(? as char) like ? or "rank" != ? or "level" not in (?, ?, ?)',
             'bindings' => [
                 'filter1-name',
                 'filter2-name',
@@ -383,13 +383,13 @@ class FilterableAndTest extends TestCase
 
     public function testNotFilters()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => [trans('quality-control.filterable.instructions.not') => ['filter1-name', 'filter2-name']],
             'nick_name' => [trans('quality-control.filterable.instructions.not') => 'filter-nickname'],
             'rank' => [trans('quality-control.filterable.instructions.not') => '0'],
             'level' => [trans('quality-control.filterable.instructions.not') => ['10', '-5', '0']],
             'email' => 'filter-email',
-        ];
+        ]];
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.not like') . trans('quality-control.filterable.presenting.any of') . 'filter1-name, filter2-name',
@@ -400,7 +400,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) not like ? and cast(? as char) not like ? and cast(? as char) not like ? and cast(? as char) like ? and cast(? as char) not like ? and cast(? as char) not like ? and cast(? as char) not like ? and cast(? as char) not like ?',
+            'query' => 'select * from "testable_resources" where (cast(? as char) not like ? and cast(? as char) not like ?) or cast(? as char) not like ? or cast(? as char) like ? or cast(? as char) not like ? or (cast(? as char) not like ? and cast(? as char) not like ? and cast(? as char) not like ?)',
             'bindings' => [
                 'name',
                 '%filter1-name%',
@@ -429,24 +429,24 @@ class FilterableAndTest extends TestCase
 
     public function testBetweenFilters()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => [trans('quality-control.filterable.instructions.between') => ['filter1-name', 'filter2-name']],
             'nick_name' => [trans('quality-control.filterable.instructions.between') => ['filter1-nickname', 'filter2-nickname']],
             'rank' => [trans('quality-control.filterable.instructions.between') => ['0', '50']],
             'level' => [trans('quality-control.filterable.instructions.between') => ['-50', '0']],
             'email' => 'filter-email',
-        ];
+        ]];
 
         $presented = [
-            'name' => 'between filter1-name and filter2-name',
-            'nick_name' => 'between filter1-nickname and filter2-nickname',
-            'rank' => 'between 0 and 50',
-            'level' => 'between -50 and 0',
+            'name' => trans('quality-control.filterable.presenting.between', ['filter1-name', 'filter2-name']),
+            'nick_name' => trans('quality-control.filterable.presenting.between', ['filter1-nickname', 'filter2-nickname']),
+            'rank' => trans('quality-control.filterable.presenting.between', [0, 50]),
+            'level' => trans('quality-control.filterable.presenting.between', [-50, 0]),
             'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where "name" between ? and ? and "nick_name" between ? and ? and cast(? as char) like ? and "rank" between ? and ? and "level" between ? and ?',
+            'query' => 'select * from "testable_resources" where "name" between ? and ? or "nick_name" between ? and ? or cast(? as char) like ? or "rank" between ? and ? or "level" between ? and ?',
             'bindings' => [
                 'filter1-name',
                 'filter2-name',
@@ -469,24 +469,24 @@ class FilterableAndTest extends TestCase
 
     public function testNotBetweenFilters()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => [trans('quality-control.filterable.instructions.notBetween') => ['filter1-name', 'filter2-name']],
             'nick_name' => [trans('quality-control.filterable.instructions.notBetween') => ['filter1-nickname', 'filter2-nickname']],
             'rank' => [trans('quality-control.filterable.instructions.notBetween') => ['0', '50']],
             'level' => [trans('quality-control.filterable.instructions.notBetween') => ['-50', '0']],
             'email' => 'filter-email',
-        ];
+        ]];
 
         $presented = [
-            'name' => 'not between filter1-name and filter2-name',
-            'nick_name' => 'not between filter1-nickname and filter2-nickname',
-            'rank' => 'not between 0 and 50',
-            'level' => 'not between -50 and 0',
+            'name' => trans('quality-control.filterable.presenting.not between', ['filter1-name', 'filter2-name']),
+            'nick_name' => trans('quality-control.filterable.presenting.not between', ['filter1-nickname', 'filter2-nickname']),
+            'rank' => trans('quality-control.filterable.presenting.not between', [0, 50]),
+            'level' => trans('quality-control.filterable.presenting.not between', [-50, 0]),
             'email' => trans('quality-control.filterable.presenting.like') . 'filter-email',
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where "name" not between ? and ? and "nick_name" not between ? and ? and cast(? as char) like ? and "rank" not between ? and ? and "level" not between ? and ?',
+            'query' => 'select * from "testable_resources" where "name" not between ? and ? or "nick_name" not between ? and ? or cast(? as char) like ? or "rank" not between ? and ? or "level" not between ? and ?',
             'bindings' => [
                 'filter1-name',
                 'filter2-name',
@@ -509,13 +509,13 @@ class FilterableAndTest extends TestCase
 
     public function testGreaterThanFilters()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => [trans('quality-control.filterable.instructions.between') => ['filter1-name', '']],
             'nick_name' => [trans('quality-control.filterable.instructions.between') => ['filter1-nickname', '']],
             'rank' => [trans('quality-control.filterable.instructions.between') => ['0', '']],
             'level' => [trans('quality-control.filterable.instructions.between') => ['-50', '']],
             'email' => 'filter-email',
-        ];
+        ]];
 
         $presented = [
             'name' => '>= filter1-name',
@@ -526,7 +526,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where "name" >= ? and "nick_name" >= ? and cast(? as char) like ? and "rank" >= ? and "level" >= ?',
+            'query' => 'select * from "testable_resources" where "name" >= ? or "nick_name" >= ? or cast(? as char) like ? or "rank" >= ? or "level" >= ?',
             'bindings' => [
                 'filter1-name',
                 'filter1-nickname',
@@ -538,20 +538,20 @@ class FilterableAndTest extends TestCase
         ];
 
         $q = $this->resource->newQuery();
-        $this->assertEquals($presented, $this->resource->filter($input, $q));
+        $this->assertEquals($presented, $this->resource->filter($input, $q, true));
         $q->get();
         $this->assertQueryEquals($query);
     }
 
     public function testNotGreaterThanFilters()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => [trans('quality-control.filterable.instructions.notBetween') => ['filter1-name', '']],
             'nick_name' => [trans('quality-control.filterable.instructions.notBetween') => ['filter1-nickname', '']],
             'rank' => [trans('quality-control.filterable.instructions.notBetween') => ['0', '']],
             'level' => [trans('quality-control.filterable.instructions.notBetween') => ['-50', '']],
             'email' => 'filter-email',
-        ];
+        ]];
 
         $presented = [
             'name' => '< filter1-name',
@@ -562,7 +562,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where "name" < ? and "nick_name" < ? and cast(? as char) like ? and "rank" < ? and "level" < ?',
+            'query' => 'select * from "testable_resources" where "name" < ? or "nick_name" < ? or cast(? as char) like ? or "rank" < ? or "level" < ?',
             'bindings' => [
                 'filter1-name',
                 'filter1-nickname',
@@ -581,13 +581,13 @@ class FilterableAndTest extends TestCase
 
     public function testLessThanFilters()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => [trans('quality-control.filterable.instructions.between') => ['', 'filter1-name']],
             'nick_name' => [trans('quality-control.filterable.instructions.between') => ['', 'filter1-nickname']],
             'rank' => [trans('quality-control.filterable.instructions.between') => ['', '0']],
             'level' => [trans('quality-control.filterable.instructions.between') => ['', '50']],
             'email' => 'filter-email',
-        ];
+        ]];
 
         $presented = [
             'name' => '<= filter1-name',
@@ -598,7 +598,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where "name" <= ? and "nick_name" <= ? and cast(? as char) like ? and "rank" <= ? and "level" <= ?',
+            'query' => 'select * from "testable_resources" where "name" <= ? or "nick_name" <= ? or cast(? as char) like ? or "rank" <= ? or "level" <= ?',
             'bindings' => [
                 'filter1-name',
                 'filter1-nickname',
@@ -617,13 +617,13 @@ class FilterableAndTest extends TestCase
 
     public function testNotLessThanFilters()
     {
-        $input = [
+        $input = [trans('quality-control.filterable.__or') => [
             'name' => [trans('quality-control.filterable.instructions.notBetween') => ['', 'filter1-name']],
             'nick_name' => [trans('quality-control.filterable.instructions.notBetween') => ['', 'filter1-nickname']],
             'rank' => [trans('quality-control.filterable.instructions.notBetween') => ['', '0']],
             'level' => [trans('quality-control.filterable.instructions.notBetween') => ['', '50']],
             'email' => 'filter-email',
-        ];
+        ]];
 
         $presented = [
             'name' => '> filter1-name',
@@ -634,7 +634,7 @@ class FilterableAndTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where "name" > ? and "nick_name" > ? and cast(? as char) like ? and "rank" > ? and "level" > ?',
+            'query' => 'select * from "testable_resources" where "name" > ? or "nick_name" > ? or cast(? as char) like ? or "rank" > ? or "level" > ?',
             'bindings' => [
                 'filter1-name',
                 'filter1-nickname',

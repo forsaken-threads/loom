@@ -2,82 +2,9 @@
 
 namespace ForsakenThreads\Loom\Tests;
 
-use App\Loom\FilterCriterion;
-use App\Loom\FilterCollection;
-use DB;
-use ForsakenThreads\Loom\Tests\TestHelpers\TestableResource;
-use Illuminate\Database\Schema\Blueprint;
-use Schema;
-
 class FilterOrConnectableResourcesTest extends TestCase
 {
-    /** @var TestableResource */
-    protected $resource;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        Schema::connection('testing')->create('testable_resources', function (Blueprint $table) {
-            $table->string('id')->index();
-            $table->string('testable_connected_first_level_belongs_to_resource_id');
-            $table->string('name', 100);
-            $table->string('nickname', 20)->unique();
-            $table->string('email')->unique();
-            $table->tinyInteger('rank');
-            $table->tinyInteger('level');
-            $table->string('password');
-            $table->timestamps();
-        });
-
-        Schema::connection('testing')->create('testable_connected_first_level_has_one_resources', function (Blueprint $table) {
-            $table->string('id')->index();
-            $table->string('testable_resource_id');
-            $table->string('address', 100);
-            $table->string('city', 20);
-            $table->char('state', 2);
-        });
-
-        Schema::connection('testing')->create('testable_connected_second_level_resources', function (Blueprint $table) {
-            $table->string('id')->index();
-            $table->string('testable_connected_first_level_has_one_resource_id');
-            $table->string('address', 100);
-            $table->string('city', 20);
-            $table->char('state', 2);
-        });
-
-        Schema::connection('testing')->create('testable_connected_first_level_has_many_resources', function (Blueprint $table) {
-            $table->string('id')->index();
-            $table->string('testable_resource_id');
-            $table->string('address', 100);
-            $table->string('city', 20);
-            $table->char('state', 2);
-        });
-
-        Schema::connection('testing')->create('testable_connected_first_level_belongs_to_resources', function (Blueprint $table) {
-            $table->string('id')->index();
-            $table->string('address', 100);
-            $table->string('city', 20);
-            $table->char('state', 2);
-        });
-
-        Schema::connection('testing')->create('testable_connected_first_level_belongs_to_many_resources', function (Blueprint $table) {
-            $table->string('id')->index();
-            $table->string('address', 100);
-            $table->string('city', 20);
-            $table->char('state', 2);
-        });
-
-        Schema::connection('testing')->create('testable_connected_first_level_belongs_to_many_resource_testable_resource', function(Blueprint $table) {
-            $table->increments('id');
-            $table->string('testable_connected_first_level_belongs_to_many_resource_id');
-            $table->string('testable_resource_id');
-            $table->timestamps();
-        });
-
-        DB::connection('testing')->enableQueryLog();
-        $this->resource = new TestableResource();
-    }
+    protected $withConnectedResources = true;
 
     public function testConnectableFirstLevelHasOneResource()
     {
@@ -89,15 +16,6 @@ class FilterOrConnectableResourcesTest extends TestCase
                 'state' => 'MI',
             ]],
         ];
-
-        $output = new FilterCollection([
-            'name' => new FilterCriterion('filter-name', 'name'),
-            'TestableConnectedFirstLevelHasOneResource' => new FilterCollection([
-                'address' => new FilterCriterion('filter-address', 'address', true),
-                'city' => new FilterCriterion('filter-city', 'city', true),
-                'state' => new FilterCriterion('MI', 'state', true),
-            ], true)
-        ]);
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -122,14 +40,10 @@ class FilterOrConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
-        $this->assertEquals($output, $result);
-
         $q = $this->resource->newQuery();
         $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testConnectableFirstLevelMultiResources()
@@ -147,20 +61,6 @@ class FilterOrConnectableResourcesTest extends TestCase
                 'state' => 'MI',
             ]],
         ]];
-
-        $output = new FilterCollection([
-            'name' => new FilterCriterion('filter-name', 'name', true),
-            'TestableConnectedFirstLevelHasOneResource' => new FilterCollection([
-                'address' => new FilterCriterion('filter-address', 'address'),
-                'city' => new FilterCriterion('filter-city', 'city'),
-                'state' => new FilterCriterion('MI', 'state'),
-            ]),
-            'TestableConnectedFirstLevelHasManyResource' => new FilterCollection([
-                'address' => new FilterCriterion('filter-address', 'address', true),
-                'city' => new FilterCriterion('filter-city', 'city', true),
-                'state' => new FilterCriterion('MI', 'state', true),
-            ], true)
-        ], true);
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -196,15 +96,10 @@ class FilterOrConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
-//        dd($result);
-        $this->assertEquals($output, $result);
-
         $q = $this->resource->newQuery();
         $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testConnectableSecondLevelResource()
@@ -222,20 +117,6 @@ class FilterOrConnectableResourcesTest extends TestCase
                 ]],
             ]],
         ];
-
-        $output = new FilterCollection([
-            'name' => new FilterCriterion('filter-name', 'name'),
-            'TestableConnectedFirstLevelHasOneResource' => new FilterCollection([
-                'address' => new FilterCriterion('filter1-address', 'address', true),
-                'city' => new FilterCriterion('filter1-city', 'city', true),
-                'state' => new FilterCriterion('MI', 'state', true),
-                'TestableConnectedSecondLevelResource' => new FilterCollection([
-                    'address' => new FilterCriterion('filter2-address', 'address', true),
-                    'city' => new FilterCriterion('filter2-city', 'city', true),
-                    'state' => new FilterCriterion('FL', 'state', true),
-                ], true),
-            ], true)
-        ]);
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -271,14 +152,10 @@ class FilterOrConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
-        $this->assertEquals($output, $result);
-
         $q = $this->resource->newQuery();
         $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testConnectableFirstLevelHasManyResource()
@@ -291,15 +168,6 @@ class FilterOrConnectableResourcesTest extends TestCase
                 'state' => 'MI',
             ]],
         ];
-
-        $output = new FilterCollection([
-            'name' => new FilterCriterion('filter-name', 'name'),
-            'TestableConnectedFirstLevelHasManyResource' => new FilterCollection([
-                'address' => new FilterCriterion('filter-address', 'address', true),
-                'city' => new FilterCriterion('filter-city', 'city', true),
-                'state' => new FilterCriterion('MI', 'state', true),
-            ], true)
-        ]);
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -324,14 +192,10 @@ class FilterOrConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
-        $this->assertEquals($output, $result);
-
         $q = $this->resource->newQuery();
         $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testConnectableFirstLevelBelongsToResource()
@@ -344,15 +208,6 @@ class FilterOrConnectableResourcesTest extends TestCase
                 'state' => 'MI',
             ]],
         ];
-
-        $output = new FilterCollection([
-            'name' => new FilterCriterion('filter-name', 'name'),
-            'TestableConnectedFirstLevelBelongsToResource' => new FilterCollection([
-                'address' => new FilterCriterion('filter-address', 'address', true),
-                'city' => new FilterCriterion('filter-city', 'city', true),
-                'state' => new FilterCriterion('MI', 'state', true),
-            ], true)
-        ]);
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -377,14 +232,10 @@ class FilterOrConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
-        $this->assertEquals($output, $result);
-
         $q = $this->resource->newQuery();
         $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 
     public function testConnectableFirstLevelBelongsToManyResource()
@@ -397,15 +248,6 @@ class FilterOrConnectableResourcesTest extends TestCase
                 'state' => 'MI',
             ]],
         ];
-
-        $output = new FilterCollection([
-            'name' => new FilterCriterion('filter-name', 'name'),
-            'TestableConnectedFirstLevelBelongsToManyResource' => new FilterCollection([
-                'address' => new FilterCriterion('filter-address', 'address', true),
-                'city' => new FilterCriterion('filter-city', 'city', true),
-                'state' => new FilterCriterion('MI', 'state', true),
-            ], true)
-        ]);
 
         $presented = [
             'name' => trans('quality-control.filterable.presenting.like') . 'filter-name',
@@ -430,13 +272,9 @@ class FilterOrConnectableResourcesTest extends TestCase
             ],
         ];
 
-        $result = $this->resource->getValidFilters($input);
-        $this->assertEquals($output, $result);
-
         $q = $this->resource->newQuery();
         $this->assertEquals($presented, $this->resource->filter($input, $q));
         $q->get();
-        $log = DB::connection('testing')->getQueryLog();
-        $this->assertArraySubset($query, array_pop($log));
+        $this->assertQueryEquals($query);
     }
 }
