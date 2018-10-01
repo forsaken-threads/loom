@@ -17,6 +17,7 @@ return [
         'property-connectable-resource-collision' => 'The following collisions between properties and connectable resources have been detected: :collisions.',
 
         'instructions' => [
+            'applyScope' => 'applyScope',
             'asString' => 'asString',
             'between' => 'between',
             'notBetween' => 'notBetween',

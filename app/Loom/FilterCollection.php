@@ -6,11 +6,9 @@ use App\Contracts\FilterContract;
 use App\Contracts\QualityControlContract;
 use App\Exceptions\LoomException;
 use Illuminate\Database\Eloquent\Builder;
-use Loom\FilterPivot;
 
 class FilterCollection
 {
-
     /**
      * @var array
      */
@@ -51,9 +49,10 @@ class FilterCollection
             $givenFilters = $givenFilters[trans('quality-control.filterable.__or')];
         }
 
-        $filterPivot = [];
         if (key_exists(trans('quality-control.filterable.__pivot'), $givenFilters) && $sourceQualityControl != null) {
             $filterPivot = FilterPivot::collect($givenFilters[trans('quality-control.filterable.__pivot')], $qualityControl, $sourceQualityControl);
+        } else {
+            $filterPivot = new FilterPivot();
         }
         unset($givenFilters[trans('quality-control.filterable.__pivot')]);
 
@@ -78,7 +77,7 @@ class FilterCollection
      * @param bool $negated
      * @param null|FilterPivot $filterPivot
      */
-    public function __construct($orTogether = false, $negated = false, /*FilterPivot*/ $filterPivot = null)
+    public function __construct($orTogether = false, $negated = false, FilterPivot $filterPivot = null)
     {
         $this->orTogether = $orTogether;
         $this->negated = $negated;
@@ -113,6 +112,11 @@ class FilterCollection
         return $this;
     }
 
+    /**
+     * @param $resource
+     * @param FilterCollection $filters
+     * @param Builder $query
+     */
     public function applyConnectedResourceFilters($resource, FilterCollection $filters, Builder $query)
     {
         $method = camel_case(($this->orTogether ? 'Or' : '') . 'WhereHas');

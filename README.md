@@ -1,7 +1,7 @@
 # Loom by forsaken-threads
 Vertically integrated application builder.  Use your application to build your application.  It's a delicious blend of CLI, UI, and IDE coding.
 
-Loom leverages Laravel 5.3 and Vue.js 2 to make building data-intensive applications quick and easy.  Declare your models as Loom Resources and get these benefits automatically:
+Loom leverages Laravel 5.7 and Vue.js 2 to make building data-intensive applications quick and easy.  Declare your models as Loom Resources and get these benefits automatically:
 
 * Totally configurable Vue components to interact with them in the UI
 * Resource controllers to serve up the Vue components and UI interaction

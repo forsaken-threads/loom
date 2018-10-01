@@ -108,7 +108,7 @@ class FilterCriterion implements FilterContract
                 }
                 $potentialFilter['criteria'] = $givenInstructions[$instruction];
                 break;
-            case trans('quality-control.filterable.instructions.applyScope'):
+//            case trans('quality-control.filterable.instructions.applyScope'):
                 // pass-through
             case trans('quality-control.filterable.instructions.exactly'):
                 // pass-through
@@ -213,6 +213,7 @@ class FilterCriterion implements FilterContract
                             $query->orWhereRaw('cast(? as char) like ?', [$this->property, '%' . $pattern . '%']);
                         }
                     } else {
+                        // TODO: do we need to allow for an array of "and'ed" likes rather than "or'ed" likes?
                         $query->where(function ($q) {
                             /** @var Builder $q */
                             foreach ($this->criterion as $pattern) {
@@ -245,6 +246,7 @@ class FilterCriterion implements FilterContract
                 return $this->comparator . ' ' . $this->criterion[1];
                 break;
 
+            // TODO: do we need to have the option of an "all of" rather than "any of"?
             case 'not like':
                 return trans('quality-control.filterable.presenting.not like') . (is_array($this->criterion) ? trans('quality-control.filterable.presenting.any of') . implode(', ', $this->criterion) : $this->criterion);
             case 'like':

@@ -41,10 +41,12 @@ class TestableResource extends Model implements DefaultFilterable
             'level' => 'integer|max:100',
             'role' => Rule::in(['Admin', 'User', 'Guest']),
         ]);
+
         $filterScope = new FilterScope('awesomeishPeople');
         $filterScope->withArguments('level')
             ->setArgumentDefault('level', 33)
             ->setValidationRules(['level' => 'numeric|between:30,100']);
+
         return $qc
             ->setConnectableResources($this, [
                 'TestableConnectedFirstLevelBelongsToResource',

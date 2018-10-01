@@ -65,7 +65,7 @@ class ResourceGenerationTest extends TestCase
         $this->assertTrue(Loom::createResource(self::RESOURCE_MODEL));
         $this->assertTrue($this->resourcePath->hasChild(self::RESOURCE_MODEL . '.php'));
         $this->assertTrue($this->resourceRouteFilePath->hasChild('loom.php'));
-        $this->seeInDatabase('loom_resources', [
+        $this->assertDatabaseHas('loom_resources', [
             'name' => Loom::getResourceClassName(self::RESOURCE_MODEL),
             'url' => Loom::getResourceUrl(self::RESOURCE_MODEL),
         ]);
@@ -77,7 +77,7 @@ class ResourceGenerationTest extends TestCase
         $this->assertTrue(Loom::createResource(self::RESOURCE_MODEL, self::RESOURCE_GROUP));
         $this->assertTrue($this->resourcePath->hasChild(self::RESOURCE_GROUP . DIRECTORY_SEPARATOR . self::RESOURCE_MODEL . '.php'));
         $this->assertTrue($this->resourceRouteFilePath->hasChild('loom.php'));
-        $this->seeInDatabase('loom_resources', [
+        $this->assertDatabaseHas('loom_resources', [
             'name' => Loom::getResourceClassName(self::RESOURCE_MODEL, self::RESOURCE_GROUP),
             'url' => Loom::getResourceUrl(self::RESOURCE_MODEL, self::RESOURCE_GROUP),
         ]);

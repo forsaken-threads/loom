@@ -27,7 +27,7 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_one_resources" where "testable_connected_first_level_has_one_resources"."testable_resource_id" = "testable_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_one_resources" where "testable_resources"."id" = "testable_connected_first_level_has_one_resources"."testable_resource_id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -77,7 +77,7 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_many_resources" where "testable_connected_first_level_has_many_resources"."testable_resource_id" = "testable_resources"."id" and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?)) and exists (select * from "testable_connected_first_level_has_one_resources" where "testable_connected_first_level_has_one_resources"."testable_resource_id" = "testable_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_many_resources" where "testable_resources"."id" = "testable_connected_first_level_has_many_resources"."testable_resource_id" and (cast(? as char) like ? or cast(? as char) like ? or cast(? as char) like ?)) and exists (select * from "testable_connected_first_level_has_one_resources" where "testable_resources"."id" = "testable_connected_first_level_has_one_resources"."testable_resource_id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -133,7 +133,7 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_one_resources" where "testable_connected_first_level_has_one_resources"."testable_resource_id" = "testable_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ? and exists (select * from "testable_connected_second_level_resources" where "testable_connected_second_level_resources"."testable_connected_first_level_has_one_resource_id" = "testable_connected_first_level_has_one_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?))',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_one_resources" where "testable_resources"."id" = "testable_connected_first_level_has_one_resources"."testable_resource_id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ? and exists (select * from "testable_connected_second_level_resources" where "testable_connected_first_level_has_one_resources"."id" = "testable_connected_second_level_resources"."testable_connected_first_level_has_one_resource_id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?))',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -179,7 +179,7 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_many_resources" where "testable_connected_first_level_has_many_resources"."testable_resource_id" = "testable_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_has_many_resources" where "testable_resources"."id" = "testable_connected_first_level_has_many_resources"."testable_resource_id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
             'bindings' => [
                 'name',
                 '%filter-name%',
@@ -262,7 +262,7 @@ class FilterAndConnectableResourcesTest extends TestCase
         ];
 
         $query = [
-            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_belongs_to_many_resources" inner join "testable_connected_first_level_belongs_to_many_resource_testable_resource" on "testable_connected_first_level_belongs_to_many_resources"."id" = "testable_connected_first_level_belongs_to_many_resource_testable_resource"."testable_connected_first_level_belongs_to_many_resource_id" where "testable_connected_first_level_belongs_to_many_resource_testable_resource"."testable_resource_id" = "testable_resources"."id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
+            'query' => 'select * from "testable_resources" where cast(? as char) like ? and exists (select * from "testable_connected_first_level_belongs_to_many_resources" inner join "testable_connected_first_level_belongs_to_many_resource_testable_resource" on "testable_connected_first_level_belongs_to_many_resources"."id" = "testable_connected_first_level_belongs_to_many_resource_testable_resource"."testable_connected_first_level_belongs_to_many_resource_id" where "testable_resources"."id" = "testable_connected_first_level_belongs_to_many_resource_testable_resource"."testable_resource_id" and cast(? as char) like ? and cast(? as char) like ? and cast(? as char) like ?)',
             'bindings' => [
                 'name',
                 '%filter-name%',

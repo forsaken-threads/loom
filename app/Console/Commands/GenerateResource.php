@@ -27,7 +27,7 @@ class GenerateResource extends Command
      *
      * @return mixed
      */
-    public function fire()
+    public function handle()
     {
         $resourceName = $this->getInput(trans('commands/generate-resource.ask-for-name'), function ($answer) {
             if (empty($answer)) {
